@@ -11,11 +11,19 @@ import {
   useAddToWatchlist,
   useRemoveFromWatchlist,
 } from "@workspace/api-client-react";
-import { Search, Star, TrendingUp, TrendingDown } from "lucide-react";
+import { Search, Star, TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 const CATEGORIES = ["All", "crypto", "forex", "stocks", "commodities"] as const;
 type Category = (typeof CATEGORIES)[number];
+
+const CATEGORY_LABELS: Record<string, string> = {
+  All: "Tous",
+  crypto: "Crypto",
+  forex: "Forex",
+  stocks: "Actions",
+  commodities: "Matières 1ères",
+};
 
 function formatPrice(price: number) {
   if (price >= 1000) return price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -35,8 +43,10 @@ export default function MarketPage() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
-  const { data: assets, isLoading } = useGetMarketAssets();
-  const { data: watchlist } = useGetWatchlist();
+  const { data: assets, isLoading, dataUpdatedAt } = useGetMarketAssets({
+    query: { refetchInterval: 6000 } as any,
+  });
+  const { data: watchlist } = useGetWatchlist({ query: { refetchInterval: 10000 } as any });
   const addToWatchlist = useAddToWatchlist();
   const removeFromWatchlist = useRemoveFromWatchlist();
 
@@ -64,14 +74,24 @@ export default function MarketPage() {
     }
   };
 
+  const lastUpdate = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString("fr-FR") : null;
+
   return (
     <Layout>
       <div className="p-4 sm:p-6 space-y-4">
-        <div>
-          <h1 className="text-2xl font-bold">Market</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {assets?.length ?? 0} assets tradables
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Marchés</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {assets?.length ?? 0} actifs tradables
+            </p>
+          </div>
+          {lastUpdate && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <RefreshCw className="h-3 w-3 animate-spin-slow" />
+              <span>Mis à jour à {lastUpdate}</span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -91,9 +111,8 @@ export default function MarketPage() {
                 variant={category === cat ? "default" : "outline"}
                 size="sm"
                 onClick={() => setCategory(cat)}
-                className="capitalize"
               >
-                {cat === "All" ? "Tous" : cat}
+                {CATEGORY_LABELS[cat]}
               </Button>
             ))}
           </div>
@@ -108,7 +127,7 @@ export default function MarketPage() {
                   <th className="text-left px-4 py-3">Actif</th>
                   <th className="text-right px-4 py-3">Prix</th>
                   <th className="text-right px-4 py-3">24h</th>
-                  <th className="text-right px-4 py-3 hidden sm:table-cell">Volume</th>
+                  <th className="text-right px-4 py-3 hidden sm:table-cell">Volume 24h</th>
                   <th className="text-right px-4 py-3 hidden md:table-cell">Catégorie</th>
                   <th className="text-right px-4 py-3"></th>
                 </tr>
@@ -141,7 +160,7 @@ export default function MarketPage() {
                         <button
                           onClick={() => toggleWatchlist(asset.symbol)}
                           className="text-muted-foreground hover:text-yellow-400 transition-colors"
-                          title={inWatchlist ? "Retirer de la liste" : "Ajouter à la liste"}
+                          title={inWatchlist ? "Retirer de la liste" : "Ajouter à la watchlist"}
                         >
                           <Star
                             className={`h-4 w-4 ${inWatchlist ? "fill-yellow-400 text-yellow-400" : ""}`}
@@ -182,7 +201,7 @@ export default function MarketPage() {
                       </td>
                       <td className="px-4 py-3 text-right hidden md:table-cell">
                         <Badge variant="outline" className="capitalize text-xs">
-                          {asset.category}
+                          {CATEGORY_LABELS[asset.category] ?? asset.category}
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-right">

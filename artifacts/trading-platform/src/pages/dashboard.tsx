@@ -16,8 +16,10 @@ import {
   useAddToWatchlist,
   useRemoveFromWatchlist,
   useCreateTrade,
+  useGetWalletBalance,
+  useGetOpenPositions,
 } from "@workspace/api-client-react";
-import { Star, TrendingUp, TrendingDown, ChevronDown } from "lucide-react";
+import { Star, TrendingUp, TrendingDown, ChevronDown, Zap } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
@@ -47,8 +49,9 @@ export default function DashboardPage() {
 
   const queryClient = useQueryClient();
   const { data: me } = useGetMe();
-  const { data: assets } = useGetMarketAssets();
-  const { data: watchlist } = useGetWatchlist();
+  const { data: assets } = useGetMarketAssets({ query: { refetchInterval: 8000 } as any });
+  const { data: watchlist } = useGetWatchlist({ query: { refetchInterval: 8000 } as any });
+  const { data: balance } = useGetWalletBalance({ query: { refetchInterval: 10000 } as any });
 
   const [selectedSymbol, setSelectedSymbol] = useState(symbolFromUrl ?? "BTC");
   const [side, setSide] = useState<"buy" | "sell">("buy");
@@ -63,8 +66,12 @@ export default function DashboardPage() {
     if (symbolFromUrl) setSelectedSymbol(symbolFromUrl);
   }, [symbolFromUrl]);
 
-  const { data: candles } = useGetCandles(selectedSymbol);
-  const { data: assetPrice } = useGetAssetPrice(selectedSymbol);
+  const { data: candles } = useGetCandles(selectedSymbol, { query: { refetchInterval: 30000 } as any });
+  const { data: assetPrice } = useGetAssetPrice(selectedSymbol, { query: { refetchInterval: 4000 } as any });
+  const { data: openPositions } = useGetOpenPositions(
+    (me?.tradingMode ?? "demo") as "real" | "demo",
+    { query: { refetchInterval: 6000 } as any }
+  );
 
   const addToWatchlist = useAddToWatchlist();
   const removeFromWatchlist = useRemoveFromWatchlist();
@@ -74,6 +81,9 @@ export default function DashboardPage() {
   const inWatchlist = watchlistSymbols.has(selectedSymbol);
 
   const mode = (me?.tradingMode ?? "demo") as "real" | "demo";
+  const currentBalance = mode === "demo"
+    ? (balance?.demoBalance ?? 0)
+    : (balance?.realBalance ?? 0);
 
   const selectedAsset = assets?.find((a) => a.symbol === selectedSymbol);
 
@@ -95,6 +105,13 @@ export default function DashboardPage() {
         { onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/market/watchlist"] }) }
       );
     }
+  };
+
+  const setQuantityFromPercent = (pct: number) => {
+    if (!assetPrice || currentBalance <= 0) return;
+    const usdAmount = currentBalance * pct;
+    const qty = usdAmount / assetPrice.price;
+    setQuantity(qty.toFixed(6));
   };
 
   const handleOrder = () => {
@@ -127,10 +144,12 @@ export default function DashboardPage() {
           queryClient.invalidateQueries({ queryKey: [`/api/trades/${mode}`] });
           queryClient.invalidateQueries({ queryKey: [`/api/trades/${mode}/open`] });
           queryClient.invalidateQueries({ queryKey: [`/api/portfolio/${mode}`] });
+          queryClient.invalidateQueries({ queryKey: ["/api/wallet/balance"] });
           setTimeout(() => setOrderMessage(null), 3000);
         },
         onError: (err: any) => {
-          setOrderMessage({ text: err?.message ?? "Erreur lors du placement.", ok: false });
+          const msg = err?.data?.error ?? err?.message ?? "Erreur lors du placement.";
+          setOrderMessage({ text: msg, ok: false });
           setTimeout(() => setOrderMessage(null), 4000);
         },
       }
@@ -138,6 +157,10 @@ export default function DashboardPage() {
   };
 
   const positive = (assetPrice?.change24hPercent ?? 0) >= 0;
+  const estimatedValue = parseFloat(quantity || "0") * parseFloat(price || "0");
+  const hasSufficientBalance = currentBalance >= estimatedValue;
+
+  const openPositionsForSymbol = openPositions?.filter(p => p.symbol === selectedSymbol) ?? [];
 
   return (
     <Layout>
@@ -273,7 +296,18 @@ export default function DashboardPage() {
               <div className="shrink-0 px-4 py-2 bg-card border-t border-border flex gap-6 text-xs text-muted-foreground overflow-x-auto">
                 <span>Bid: <span className="text-red-400 font-mono">${fmt(assetPrice.bid)}</span></span>
                 <span>Ask: <span className="text-green-400 font-mono">${fmt(assetPrice.ask)}</span></span>
-                <span>Volume: <span className="text-foreground font-mono">{assetPrice.volume24h.toLocaleString()}</span></span>
+                <span>Vol: <span className="text-foreground font-mono">{assetPrice.volume24h.toLocaleString("en-US", { maximumFractionDigits: 0 })}</span></span>
+                {openPositionsForSymbol.length > 0 && (
+                  <span className="ml-auto text-primary font-medium">
+                    {openPositionsForSymbol.length} position{openPositionsForSymbol.length > 1 ? "s" : ""} ouverte{openPositionsForSymbol.length > 1 ? "s" : ""}
+                    {" "}|{" "}
+                    P&L:{" "}
+                    <span className={openPositionsForSymbol.reduce((s, p) => s + p.pnl, 0) >= 0 ? "text-green-400" : "text-red-400"}>
+                      {openPositionsForSymbol.reduce((s, p) => s + p.pnl, 0) >= 0 ? "+" : ""}
+                      ${fmt(Math.abs(openPositionsForSymbol.reduce((s, p) => s + p.pnl, 0)))}
+                    </span>
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -281,7 +315,13 @@ export default function DashboardPage() {
           {/* Order form */}
           <div className="flex flex-col bg-card overflow-y-auto">
             <div className="px-4 py-3 border-b border-border shrink-0">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Passer un ordre</p>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Passer un ordre</p>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Solde {mode === "demo" ? "Démo" : "Réel"}</p>
+                  <p className="font-mono font-bold text-sm">${fmt(currentBalance)}</p>
+                </div>
+              </div>
 
               <div className="flex rounded-lg overflow-hidden border border-border">
                 <button
@@ -343,14 +383,20 @@ export default function DashboardPage() {
                   step="0.001"
                   min="0"
                 />
-                <div className="flex gap-2 mt-1.5">
-                  {["0.01", "0.1", "1", "10"].map((v) => (
+                <div className="flex gap-2 mt-1.5 flex-wrap">
+                  <span className="text-xs text-muted-foreground self-center">Rapide:</span>
+                  {[
+                    { label: "10%", pct: 0.1 },
+                    { label: "25%", pct: 0.25 },
+                    { label: "50%", pct: 0.5 },
+                    { label: "Max", pct: 1 },
+                  ].map(({ label, pct }) => (
                     <button
-                      key={v}
-                      onClick={() => setQuantity(v)}
-                      className="text-xs text-primary hover:text-primary/80 font-medium"
+                      key={label}
+                      onClick={() => setQuantityFromPercent(pct)}
+                      className="text-xs text-primary hover:text-primary/80 font-medium border border-primary/30 hover:border-primary/60 rounded px-1.5 py-0.5 transition-colors"
                     >
-                      {v}
+                      {label}
                     </button>
                   ))}
                 </div>
@@ -401,14 +447,20 @@ export default function DashboardPage() {
               </div>
 
               {quantity && price && (
-                <div className="bg-secondary/50 rounded-lg p-3 text-xs space-y-1.5 border border-border">
+                <div className={`rounded-lg p-3 text-xs space-y-1.5 border ${
+                  !hasSufficientBalance
+                    ? "bg-red-500/5 border-red-500/30"
+                    : "bg-secondary/50 border-border"
+                }`}>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Valeur estimée</span>
-                    <span className="font-mono font-medium">${fmt(parseFloat(quantity || "0") * parseFloat(price || "0"))}</span>
+                    <span className={`font-mono font-medium ${!hasSufficientBalance ? "text-red-400" : ""}`}>
+                      ${fmt(estimatedValue)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Actif</span>
-                    <span className="font-mono">{selectedSymbol}</span>
+                    <span className="text-muted-foreground">Solde disponible</span>
+                    <span className="font-mono">${fmt(currentBalance)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Mode</span>
@@ -416,6 +468,9 @@ export default function DashboardPage() {
                       {mode === "demo" ? "DEMO" : "LIVE"}
                     </Badge>
                   </div>
+                  {!hasSufficientBalance && (
+                    <p className="text-red-400 font-medium">Solde insuffisant</p>
+                  )}
                 </div>
               )}
 
@@ -430,18 +485,51 @@ export default function DashboardPage() {
               )}
 
               <Button
-                className={`w-full font-bold ${
+                className={`w-full font-bold gap-2 ${
                   side === "buy"
                     ? "bg-green-500 hover:bg-green-600 text-white"
                     : "bg-red-500 hover:bg-red-600 text-white"
                 }`}
                 onClick={handleOrder}
-                disabled={createTrade.isPending}
+                disabled={createTrade.isPending || (!!quantity && !!price && !hasSufficientBalance)}
               >
+                <Zap className="h-4 w-4" />
                 {createTrade.isPending
                   ? "Traitement..."
                   : `${side === "buy" ? "Acheter" : "Vendre"} ${selectedSymbol}`}
               </Button>
+
+              {/* Open positions for this symbol */}
+              {openPositionsForSymbol.length > 0 && (
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <div className="px-3 py-2 bg-secondary/40 border-b border-border">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Mes positions {selectedSymbol}
+                    </p>
+                  </div>
+                  {openPositionsForSymbol.map((pos) => {
+                    const pnlPos = pos.pnl >= 0;
+                    return (
+                      <div key={pos.id} className="px-3 py-2 flex items-center justify-between text-xs border-b border-border/50 last:border-0">
+                        <div>
+                          <span className={`font-bold ${pos.side === "buy" ? "text-green-400" : "text-red-400"}`}>
+                            {pos.side === "buy" ? "↑" : "↓"} {pos.side.toUpperCase()}
+                          </span>
+                          <span className="text-muted-foreground ml-1.5">×{pos.quantity}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className={`font-mono font-bold ${pnlPos ? "text-green-400" : "text-red-400"}`}>
+                            {pnlPos ? "+" : ""}${fmt(Math.abs(pos.pnl))}
+                          </span>
+                          <p className={`text-xs ${pnlPos ? "text-green-400" : "text-red-400"}`}>
+                            {pnlPos ? "+" : ""}{pos.pnlPercent.toFixed(2)}%
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,11 +1,20 @@
 import { Layout } from "@/components/layout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useGetMe, useGetPortfolio, useGetPortfolioSummary } from "@workspace/api-client-react";
-import { TrendingUp, TrendingDown, BarChart2, Target, Activity, Layers } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useGetMe, useGetPortfolio, useGetPortfolioSummary, useClosePosition } from "@workspace/api-client-react";
+import { TrendingUp, TrendingDown, BarChart2, Target, Activity, Layers, DollarSign } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtPrice(n: number) {
+  if (n >= 1000) return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (n >= 1) return n.toFixed(4);
+  return n.toFixed(6);
 }
 
 function PnlBadge({ value }: { value: number }) {
@@ -61,11 +70,47 @@ function StatCard({
 export default function PortfolioPage() {
   const { data: me } = useGetMe();
   const mode = (me?.tradingMode ?? "demo") as "real" | "demo";
+  const queryClient = useQueryClient();
+  const closePosition = useClosePosition();
+  const [closingId, setClosingId] = useState<number | null>(null);
+  const [closeMsg, setCloseMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
-  const { data: portfolio, isLoading: loadingPortfolio } = useGetPortfolio(mode);
-  const { data: summary, isLoading: loadingSummary } = useGetPortfolioSummary(mode);
+  const { data: portfolio, isLoading: loadingPortfolio } = useGetPortfolio(mode, {
+    query: { refetchInterval: 6000 } as any,
+  });
+  const { data: summary, isLoading: loadingSummary } = useGetPortfolioSummary(mode, {
+    query: { refetchInterval: 6000 } as any,
+  });
 
   const isLoading = loadingPortfolio || loadingSummary;
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: [`/api/portfolio/${mode}`] });
+    queryClient.invalidateQueries({ queryKey: [`/api/portfolio/${mode}/summary`] });
+    queryClient.invalidateQueries({ queryKey: [`/api/trades/${mode}/open`] });
+    queryClient.invalidateQueries({ queryKey: ["/api/wallet/balance"] });
+  };
+
+  const handleClose = (id: number) => {
+    setClosingId(id);
+    closePosition.mutate(id, {
+      onSuccess: (data: any) => {
+        const pnl = data?.pnl ?? 0;
+        setCloseMsg({
+          text: `Position fermée. P&L: ${pnl >= 0 ? "+" : ""}$${fmt(Math.abs(pnl))}`,
+          ok: pnl >= 0,
+        });
+        refresh();
+        setClosingId(null);
+        setTimeout(() => setCloseMsg(null), 4000);
+      },
+      onError: () => {
+        setCloseMsg({ text: "Erreur lors de la fermeture.", ok: false });
+        setClosingId(null);
+        setTimeout(() => setCloseMsg(null), 3000);
+      },
+    });
+  };
 
   return (
     <Layout>
@@ -76,6 +121,16 @@ export default function PortfolioPage() {
             Mode {mode === "demo" ? "Démo" : "Réel"}
           </p>
         </div>
+
+        {closeMsg && (
+          <div className={`p-3 rounded-lg text-sm font-medium border ${
+            closeMsg.ok
+              ? "bg-green-500/10 border-green-500/30 text-green-400"
+              : "bg-red-500/10 border-red-500/30 text-red-400"
+          }`}>
+            {closeMsg.text}
+          </div>
+        )}
 
         {isLoading ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -92,8 +147,8 @@ export default function PortfolioPage() {
             />
             <StatCard
               label="P&L Total"
-              value={`${portfolio?.totalPnl && portfolio.totalPnl >= 0 ? "+" : ""}$${fmt(Math.abs(portfolio?.totalPnl ?? 0))}`}
-              sub={`${portfolio?.totalPnlPercent?.toFixed(2)}%`}
+              value={`${(portfolio?.totalPnl ?? 0) >= 0 ? "+" : ""}$${fmt(Math.abs(portfolio?.totalPnl ?? 0))}`}
+              sub={`${(portfolio?.totalPnlPercent ?? 0).toFixed(2)}%`}
               icon={TrendingUp}
               positive={(portfolio?.totalPnl ?? 0) >= 0}
             />
@@ -139,6 +194,7 @@ export default function PortfolioPage() {
           <div className="px-4 py-3 border-b border-border flex items-center gap-2">
             <Activity className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold uppercase tracking-wider">Positions ouvertes</h2>
+            <span className="text-xs text-muted-foreground ml-auto">P&L live · actualisation auto</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -150,26 +206,28 @@ export default function PortfolioPage() {
                   <th className="text-right px-4 py-3">Prix d'entrée</th>
                   <th className="text-right px-4 py-3">Prix actuel</th>
                   <th className="text-right px-4 py-3">P&L</th>
+                  <th className="px-4 py-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading &&
                   Array.from({ length: 3 }).map((_, i) => (
                     <tr key={i} className="border-b border-border/50">
-                      <td colSpan={6} className="px-4 py-3">
+                      <td colSpan={7} className="px-4 py-3">
                         <div className="h-5 bg-secondary rounded animate-pulse" />
                       </td>
                     </tr>
                   ))}
                 {!isLoading && (!portfolio?.positions || portfolio.positions.length === 0) && (
                   <tr>
-                    <td colSpan={6} className="text-center py-12 text-muted-foreground">
+                    <td colSpan={7} className="text-center py-12 text-muted-foreground">
                       Aucune position ouverte. Commencez à trader depuis le Dashboard.
                     </td>
                   </tr>
                 )}
                 {portfolio?.positions?.map((pos) => {
                   const pnlPos = pos.pnl >= 0;
+                  const isClosing = closingId === pos.id;
                   return (
                     <tr key={pos.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
                       <td className="px-4 py-3">
@@ -187,8 +245,8 @@ export default function PortfolioPage() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-right font-mono">{pos.quantity}</td>
-                      <td className="px-4 py-3 text-right font-mono">${fmt(pos.entryPrice)}</td>
-                      <td className="px-4 py-3 text-right font-mono">${fmt(pos.currentPrice)}</td>
+                      <td className="px-4 py-3 text-right font-mono">${fmtPrice(pos.entryPrice)}</td>
+                      <td className="px-4 py-3 text-right font-mono">${fmtPrice(pos.currentPrice)}</td>
                       <td className="px-4 py-3 text-right">
                         <div>
                           <PnlBadge value={pos.pnl} />
@@ -196,6 +254,18 @@ export default function PortfolioPage() {
                             {pnlPos ? "+" : ""}{pos.pnlPercent.toFixed(2)}%
                           </p>
                         </div>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleClose(pos.id)}
+                          disabled={isClosing}
+                          className="h-7 px-2 text-xs gap-1 border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                        >
+                          <DollarSign className="h-3 w-3" />
+                          {isClosing ? "..." : "Fermer"}
+                        </Button>
                       </td>
                     </tr>
                   );

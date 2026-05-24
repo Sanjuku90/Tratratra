@@ -3,12 +3,24 @@ import { Layout } from "@/components/layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useGetMe, useGetTrades, useGetOpenPositions, useCancelTrade } from "@workspace/api-client-react";
-import { History, Activity, X } from "lucide-react";
+import {
+  useGetMe,
+  useGetTrades,
+  useGetOpenPositions,
+  useCancelTrade,
+  useClosePosition,
+} from "@workspace/api-client-react";
+import { History, Activity, X, DollarSign } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtPrice(n: number) {
+  if (n >= 1000) return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (n >= 1) return n.toFixed(4);
+  return n.toFixed(6);
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -36,17 +48,50 @@ export default function TradesPage() {
   const { data: me } = useGetMe();
   const mode = (me?.tradingMode ?? "demo") as "real" | "demo";
   const queryClient = useQueryClient();
+  const [closingId, setClosingId] = useState<number | null>(null);
+  const [closeMsg, setCloseMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
-  const { data: openPositions, isLoading: loadingOpen } = useGetOpenPositions(mode);
+  const { data: openPositions, isLoading: loadingOpen } = useGetOpenPositions(mode, {
+    query: { refetchInterval: 5000 } as any,
+  });
   const { data: trades, isLoading: loadingTrades } = useGetTrades(mode);
   const cancelTrade = useCancelTrade();
+  const closePosition = useClosePosition();
 
-  const handleCancel = (id: number) => {
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: [`/api/trades/${mode}/open`] });
+    queryClient.invalidateQueries({ queryKey: [`/api/trades/${mode}`] });
+    queryClient.invalidateQueries({ queryKey: [`/api/portfolio/${mode}`] });
+    queryClient.invalidateQueries({ queryKey: [`/api/portfolio/${mode}/summary`] });
+    queryClient.invalidateQueries({ queryKey: ["/api/wallet/balance"] });
+  };
+
+  const handleClose = (id: number) => {
+    setClosingId(id);
+    closePosition.mutate(id, {
+      onSuccess: (data: any) => {
+        const pnl = data?.pnl ?? 0;
+        setCloseMsg({
+          text: `Position fermée. P&L: ${pnl >= 0 ? "+" : ""}$${fmt(Math.abs(pnl))}`,
+          ok: pnl >= 0,
+        });
+        refresh();
+        setClosingId(null);
+        setTimeout(() => setCloseMsg(null), 4000);
+      },
+      onError: () => {
+        setCloseMsg({ text: "Erreur lors de la fermeture.", ok: false });
+        setClosingId(null);
+        setTimeout(() => setCloseMsg(null), 3000);
+      },
+    });
+  };
+
+  const handleCancelPending = (id: number) => {
     cancelTrade.mutate(
       { id },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: [`/api/trades/${mode}/open`] });
           queryClient.invalidateQueries({ queryKey: [`/api/trades/${mode}`] });
         },
       }
@@ -62,6 +107,16 @@ export default function TradesPage() {
             Mode {mode === "demo" ? "Démo" : "Réel"}
           </p>
         </div>
+
+        {closeMsg && (
+          <div className={`p-3 rounded-lg text-sm font-medium border ${
+            closeMsg.ok
+              ? "bg-green-500/10 border-green-500/30 text-green-400"
+              : "bg-red-500/10 border-red-500/30 text-red-400"
+          }`}>
+            {closeMsg.text}
+          </div>
+        )}
 
         <div className="flex gap-2">
           <Button
@@ -102,7 +157,7 @@ export default function TradesPage() {
                     <th className="text-right px-4 py-3">Actuel</th>
                     <th className="text-right px-4 py-3">P&L</th>
                     <th className="text-right px-4 py-3">Ouvert le</th>
-                    <th className="px-4 py-3"></th>
+                    <th className="px-4 py-3 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -123,6 +178,7 @@ export default function TradesPage() {
                   )}
                   {openPositions?.map((pos) => {
                     const pnlPos = pos.pnl >= 0;
+                    const isClosing = closingId === pos.id;
                     return (
                       <tr key={pos.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
                         <td className="px-4 py-3">
@@ -138,25 +194,32 @@ export default function TradesPage() {
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-right font-mono">{pos.quantity}</td>
-                        <td className="px-4 py-3 text-right font-mono">${fmt(pos.entryPrice)}</td>
-                        <td className="px-4 py-3 text-right font-mono">${fmt(pos.currentPrice)}</td>
+                        <td className="px-4 py-3 text-right font-mono">${fmtPrice(pos.entryPrice)}</td>
+                        <td className="px-4 py-3 text-right font-mono">${fmtPrice(pos.currentPrice)}</td>
                         <td className="px-4 py-3 text-right">
-                          <span className={`font-mono font-medium ${pnlPos ? "text-green-400" : "text-red-400"}`}>
-                            {pnlPos ? "+" : ""}${fmt(Math.abs(pos.pnl))}
-                          </span>
+                          <div>
+                            <span className={`font-mono font-medium ${pnlPos ? "text-green-400" : "text-red-400"}`}>
+                              {pnlPos ? "+" : ""}${fmt(Math.abs(pos.pnl))}
+                            </span>
+                            <p className={`text-xs ${pnlPos ? "text-green-400" : "text-red-400"}`}>
+                              {pnlPos ? "+" : ""}{pos.pnlPercent.toFixed(2)}%
+                            </p>
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-right text-muted-foreground text-xs">
                           {new Date(pos.openedAt).toLocaleDateString("fr-FR")}
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <button
-                            onClick={() => handleCancel(pos.id)}
-                            disabled={cancelTrade.isPending}
-                            title="Fermer la position"
-                            className="text-muted-foreground hover:text-red-400 transition-colors"
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleClose(pos.id)}
+                            disabled={isClosing}
+                            className="h-7 px-2 text-xs gap-1 border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300"
                           >
-                            <X className="h-4 w-4" />
-                          </button>
+                            <DollarSign className="h-3 w-3" />
+                            {isClosing ? "..." : "Fermer"}
+                          </Button>
                         </td>
                       </tr>
                     );
@@ -181,20 +244,21 @@ export default function TradesPage() {
                     <th className="text-right px-4 py-3">P&L</th>
                     <th className="text-right px-4 py-3">Statut</th>
                     <th className="text-right px-4 py-3">Date</th>
+                    <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingTrades &&
                     Array.from({ length: 5 }).map((_, i) => (
                       <tr key={i} className="border-b border-border/50">
-                        <td colSpan={8} className="px-4 py-3">
+                        <td colSpan={9} className="px-4 py-3">
                           <div className="h-5 bg-secondary rounded animate-pulse" />
                         </td>
                       </tr>
                     ))}
                   {!loadingTrades && (!trades || trades.length === 0) && (
                     <tr>
-                      <td colSpan={8} className="text-center py-12 text-muted-foreground">
+                      <td colSpan={9} className="text-center py-12 text-muted-foreground">
                         Aucun trade dans l'historique
                       </td>
                     </tr>
@@ -225,7 +289,7 @@ export default function TradesPage() {
                           {orderTypeLabels[trade.orderType] ?? trade.orderType}
                         </td>
                         <td className="px-4 py-3 text-right font-mono">{trade.quantity}</td>
-                        <td className="px-4 py-3 text-right font-mono">${fmt(trade.executedPrice ?? trade.price)}</td>
+                        <td className="px-4 py-3 text-right font-mono">${fmtPrice(trade.executedPrice ?? trade.price)}</td>
                         <td className="px-4 py-3 text-right">
                           {trade.pnl != null ? (
                             <span className={`font-mono font-medium ${pnlPos ? "text-green-400" : "text-red-400"}`}>
@@ -240,6 +304,18 @@ export default function TradesPage() {
                         </td>
                         <td className="px-4 py-3 text-right text-muted-foreground text-xs">
                           {new Date(trade.createdAt).toLocaleDateString("fr-FR")}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          {trade.status === "pending" && (
+                            <button
+                              onClick={() => handleCancelPending(trade.id)}
+                              disabled={cancelTrade.isPending}
+                              title="Annuler l'ordre"
+                              className="text-muted-foreground hover:text-red-400 transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );

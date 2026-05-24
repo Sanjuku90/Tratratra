@@ -58,4 +58,30 @@ router.patch("/account/me", requireAuth, async (req: any, res) => {
   }
 });
 
+// POST /api/account/reset-demo — reset demo balance back to $10,000
+router.post("/account/reset-demo", requireAuth, async (req: any, res) => {
+  try {
+    const clerkId = req.clerkId;
+    const existing = await db.select().from(usersTable).where(eq(usersTable.clerkId, clerkId)).limit(1);
+    if (!existing.length) return res.status(404).json({ error: "User not found" });
+
+    const [updated] = await db.update(usersTable)
+      .set({ demoBalance: "10000", updatedAt: new Date() })
+      .where(eq(usersTable.clerkId, clerkId))
+      .returning();
+
+    res.json({
+      id: updated.id,
+      clerkId: updated.clerkId,
+      email: updated.email,
+      displayName: updated.displayName ?? null,
+      tradingMode: updated.tradingMode,
+      createdAt: updated.createdAt.toISOString(),
+      demoBalance: parseFloat(updated.demoBalance),
+    });
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

@@ -154,7 +154,7 @@ router.get("/trades/:mode/open", requireAuth, async (req: any, res) => {
   }
 });
 
-// DELETE /api/trades/order/:id
+// DELETE /api/trades/order/:id  — cancel a pending order only
 router.delete("/trades/order/:id", requireAuth, async (req: any, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -164,8 +164,8 @@ router.delete("/trades/order/:id", requireAuth, async (req: any, res) => {
       .where(and(eq(tradesTable.id, id), eq(tradesTable.userId, user.id)));
 
     if (!trade) return res.status(404).json({ error: "Trade not found" });
-    if (trade.status !== "pending" && trade.status !== "open") {
-      return res.status(400).json({ error: "Trade cannot be cancelled" });
+    if (trade.status !== "pending") {
+      return res.status(400).json({ error: "Only pending orders can be cancelled this way" });
     }
 
     const [cancelled] = await db.update(tradesTable)
@@ -174,6 +174,62 @@ router.delete("/trades/order/:id", requireAuth, async (req: any, res) => {
       .returning();
 
     res.json(formatTrade(cancelled));
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/trades/position/:id/close  — close an open position at market price, realise P&L
+router.post("/trades/position/:id/close", requireAuth, async (req: any, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const user = await getOrCreateUser(req.clerkId);
+
+    const [trade] = await db.select().from(tradesTable)
+      .where(and(eq(tradesTable.id, id), eq(tradesTable.userId, user.id)));
+
+    if (!trade) return res.status(404).json({ error: "Trade not found" });
+    if (trade.status !== "open") {
+      return res.status(400).json({ error: "Only open positions can be closed" });
+    }
+
+    const priceData = getAssetPriceData(trade.symbol);
+    const closePrice = priceData?.price ?? parseFloat(trade.executedPrice ?? trade.price);
+    const qty = parseFloat(trade.quantity);
+    const entryPrice = parseFloat(trade.executedPrice ?? trade.price);
+
+    const pnl = trade.side === "buy"
+      ? (closePrice - entryPrice) * qty
+      : (entryPrice - closePrice) * qty;
+
+    // Restore original cost + realised P&L to user balance
+    const originalCost = entryPrice * qty;
+    const returnAmount = originalCost + pnl;
+
+    const mode = trade.mode as "real" | "demo";
+    if (mode === "real") {
+      const newBalance = Math.max(0, parseFloat(user.realBalance) + returnAmount);
+      await db.update(usersTable).set({ realBalance: newBalance.toString(), updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+    } else {
+      const newBalance = Math.max(0, parseFloat(user.demoBalance) + returnAmount);
+      await db.update(usersTable).set({ demoBalance: newBalance.toString(), updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+    }
+
+    const [closed] = await db.update(tradesTable)
+      .set({ status: "closed", pnl: pnl.toString(), closedAt: new Date() })
+      .where(eq(tradesTable.id, id))
+      .returning();
+
+    await db.insert(transactionsTable).values({
+      userId: user.id,
+      type: "trade_sell",
+      amount: Math.abs(returnAmount).toString(),
+      currency: "USD",
+      status: "completed",
+      description: `Closed ${qty} ${trade.symbol} @ ${closePrice.toFixed(4)} | P&L: ${pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}`,
+    });
+
+    res.json({ ...formatTrade(closed), closedPrice: closePrice, pnl });
   } catch {
     res.status(500).json({ error: "Internal server error" });
   }

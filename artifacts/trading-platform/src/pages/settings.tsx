@@ -5,16 +5,20 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useGetMe, useUpdateMe } from "@workspace/api-client-react";
-import { User, Shield, Activity, Save } from "lucide-react";
+import { useGetMe, useUpdateMe, useResetDemo } from "@workspace/api-client-react";
+import { User, Shield, Activity, Save, RotateCcw } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function SettingsPage() {
   const { user: clerkUser } = useUser();
   const { data: me } = useGetMe();
   const updateMe = useUpdateMe();
+  const resetDemo = useResetDemo();
+  const queryClient = useQueryClient();
 
   const [displayName, setDisplayName] = useState("");
   const [saved, setSaved] = useState(false);
+  const [resetMsg, setResetMsg] = useState("");
 
   useEffect(() => {
     if (me?.displayName) setDisplayName(me.displayName);
@@ -33,7 +37,26 @@ export default function SettingsPage() {
   };
 
   const handleModeToggle = (mode: "real" | "demo") => {
-    updateMe.mutate({ data: { tradingMode: mode } });
+    updateMe.mutate({ data: { tradingMode: mode } }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["/api/account/me"] });
+      },
+    });
+  };
+
+  const handleResetDemo = () => {
+    resetDemo.mutate(undefined, {
+      onSuccess: () => {
+        setResetMsg("Compte démo réinitialisé à $10,000 !");
+        queryClient.invalidateQueries({ queryKey: ["/api/wallet/balance"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/account/me"] });
+        setTimeout(() => setResetMsg(""), 3000);
+      },
+      onError: () => {
+        setResetMsg("Erreur lors de la réinitialisation.");
+        setTimeout(() => setResetMsg(""), 3000);
+      },
+    });
   };
 
   return (
@@ -122,6 +145,34 @@ export default function SettingsPage() {
               </p>
             </button>
           </div>
+        </Card>
+
+        <Card className="border-border bg-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <RotateCcw className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold uppercase tracking-wider">Réinitialiser le compte démo</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Réinitialisez votre solde de démonstration à $10,000. Vos trades démo ouverts resteront en place.
+          </p>
+          {resetMsg && (
+            <div className={`mb-3 p-2.5 rounded-lg text-xs font-medium border ${
+              resetMsg.includes("réinitialisé")
+                ? "bg-green-500/10 border-green-500/30 text-green-400"
+                : "bg-red-500/10 border-red-500/30 text-red-400"
+            }`}>
+              {resetMsg}
+            </div>
+          )}
+          <Button
+            variant="outline"
+            onClick={handleResetDemo}
+            disabled={resetDemo.isPending}
+            className="gap-2 border-primary/40 text-primary hover:bg-primary/10"
+          >
+            <RotateCcw className={`h-4 w-4 ${resetDemo.isPending ? "animate-spin" : ""}`} />
+            {resetDemo.isPending ? "Réinitialisation..." : "Réinitialiser à $10,000"}
+          </Button>
         </Card>
 
         <Card className="border-border bg-card p-5">
