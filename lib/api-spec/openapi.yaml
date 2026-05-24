@@ -1,22 +1,31 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Trading platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: account
+    description: User account operations
+  - name: portfolio
+    description: Portfolio management
+  - name: trades
+    description: Trade operations
+  - name: market
+    description: Market data
+  - name: wallet
+    description: Wallet and deposits
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +33,327 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /account/me:
+    get:
+      operationId: getMe
+      tags: [account]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+    patch:
+      operationId: updateMe
+      tags: [account]
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /wallet/balance:
+    get:
+      operationId: getWalletBalance
+      tags: [wallet]
+      summary: Get wallet balances (real and demo)
+      responses:
+        "200":
+          description: Wallet balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletBalance"
+
+  /wallet/deposit:
+    post:
+      operationId: deposit
+      tags: [wallet]
+      summary: Deposit funds to real account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepositInput"
+      responses:
+        "200":
+          description: Updated balance after deposit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletBalance"
+
+  /wallet/withdraw:
+    post:
+      operationId: withdraw
+      tags: [wallet]
+      summary: Withdraw funds from real account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawInput"
+      responses:
+        "200":
+          description: Updated balance after withdrawal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletBalance"
+
+  /wallet/transactions:
+    get:
+      operationId: getTransactions
+      tags: [wallet]
+      summary: Get wallet transaction history
+      responses:
+        "200":
+          description: Transaction list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  /portfolio/{mode}:
+    get:
+      operationId: getPortfolio
+      tags: [portfolio]
+      summary: Get portfolio for real or demo mode
+      parameters:
+        - name: mode
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [real, demo]
+      responses:
+        "200":
+          description: Portfolio data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Portfolio"
+
+  /portfolio/{mode}/summary:
+    get:
+      operationId: getPortfolioSummary
+      tags: [portfolio]
+      summary: Get portfolio performance summary
+      parameters:
+        - name: mode
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [real, demo]
+      responses:
+        "200":
+          description: Portfolio summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortfolioSummary"
+
+  /trades/{mode}:
+    get:
+      operationId: getTrades
+      tags: [trades]
+      summary: Get trade history for real or demo mode
+      parameters:
+        - name: mode
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [real, demo]
+      responses:
+        "200":
+          description: Trade history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Trade"
+
+  /trades:
+    post:
+      operationId: createTrade
+      tags: [trades]
+      summary: Place a trade order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TradeInput"
+      responses:
+        "201":
+          description: Trade placed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+
+  /trades/{mode}/open:
+    get:
+      operationId: getOpenPositions
+      tags: [trades]
+      summary: Get currently open positions
+      parameters:
+        - name: mode
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [real, demo]
+      responses:
+        "200":
+          description: Open positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Position"
+
+  /trades/order/{id}:
+    delete:
+      operationId: cancelTrade
+      tags: [trades]
+      summary: Cancel a pending trade
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Trade cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+
+  /market/assets:
+    get:
+      operationId: getMarketAssets
+      tags: [market]
+      summary: Get list of all tradable assets
+      responses:
+        "200":
+          description: Asset list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Asset"
+
+  /market/assets/{symbol}/price:
+    get:
+      operationId: getAssetPrice
+      tags: [market]
+      summary: Get current price for an asset
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Asset price data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetPrice"
+
+  /market/assets/{symbol}/candles:
+    get:
+      operationId: getCandles
+      tags: [market]
+      summary: Get OHLCV candlestick data for charting
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Candlestick data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Candle"
+
+  /market/watchlist:
+    get:
+      operationId: getWatchlist
+      tags: [market]
+      summary: Get user's watchlist with live prices
+      responses:
+        "200":
+          description: Watchlist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WatchlistItem"
+    post:
+      operationId: addToWatchlist
+      tags: [market]
+      summary: Add asset to watchlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WatchlistInput"
+      responses:
+        "201":
+          description: Added to watchlist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WatchlistItem"
+
+  /market/watchlist/{symbol}:
+    delete:
+      operationId: removeFromWatchlist
+      tags: [market]
+      summary: Remove asset from watchlist
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Removed from watchlist
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +361,309 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        clerkId:
+          type: string
+        email:
+          type: string
+        displayName:
+          type: ["string", "null"]
+        tradingMode:
+          type: string
+          enum: [real, demo]
+        createdAt:
+          type: string
+      required: [id, clerkId, email, tradingMode, createdAt]
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        displayName:
+          type: string
+        tradingMode:
+          type: string
+          enum: [real, demo]
+
+    WalletBalance:
+      type: object
+      properties:
+        realBalance:
+          type: number
+        demoBalance:
+          type: number
+        currency:
+          type: string
+      required: [realBalance, demoBalance, currency]
+
+    DepositInput:
+      type: object
+      properties:
+        amount:
+          type: number
+        method:
+          type: string
+          enum: [card, bank_transfer, crypto]
+      required: [amount, method]
+
+    WithdrawInput:
+      type: object
+      properties:
+        amount:
+          type: number
+        method:
+          type: string
+          enum: [bank_transfer, crypto]
+      required: [amount, method]
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [deposit, withdrawal, trade_buy, trade_sell, fee]
+        amount:
+          type: number
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [pending, completed, failed]
+        description:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, type, amount, currency, status, createdAt]
+
+    Portfolio:
+      type: object
+      properties:
+        totalValue:
+          type: number
+        totalPnl:
+          type: number
+        totalPnlPercent:
+          type: number
+        positions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Position"
+        mode:
+          type: string
+          enum: [real, demo]
+      required: [totalValue, totalPnl, totalPnlPercent, positions, mode]
+
+    PortfolioSummary:
+      type: object
+      properties:
+        totalValue:
+          type: number
+        dayChange:
+          type: number
+        dayChangePercent:
+          type: number
+        totalPnl:
+          type: number
+        totalPnlPercent:
+          type: number
+        winRate:
+          type: number
+        totalTrades:
+          type: integer
+        openPositions:
+          type: integer
+        bestTrade:
+          type: ["number", "null"]
+        worstTrade:
+          type: ["number", "null"]
+        mode:
+          type: string
+          enum: [real, demo]
+      required: [totalValue, dayChange, dayChangePercent, totalPnl, totalPnlPercent, winRate, totalTrades, openPositions, mode]
+
+    Position:
+      type: object
+      properties:
+        id:
+          type: integer
+        symbol:
+          type: string
+        assetName:
+          type: string
+        side:
+          type: string
+          enum: [buy, sell]
+        quantity:
+          type: number
+        entryPrice:
+          type: number
+        currentPrice:
+          type: number
+        pnl:
+          type: number
+        pnlPercent:
+          type: number
+        mode:
+          type: string
+          enum: [real, demo]
+        openedAt:
+          type: string
+      required: [id, symbol, assetName, side, quantity, entryPrice, currentPrice, pnl, pnlPercent, mode, openedAt]
+
+    Trade:
+      type: object
+      properties:
+        id:
+          type: integer
+        symbol:
+          type: string
+        assetName:
+          type: string
+        side:
+          type: string
+          enum: [buy, sell]
+        orderType:
+          type: string
+          enum: [market, limit, stop_loss, take_profit]
+        quantity:
+          type: number
+        price:
+          type: number
+        executedPrice:
+          type: ["number", "null"]
+        stopLoss:
+          type: ["number", "null"]
+        takeProfit:
+          type: ["number", "null"]
+        status:
+          type: string
+          enum: [pending, open, closed, cancelled]
+        pnl:
+          type: ["number", "null"]
+        mode:
+          type: string
+          enum: [real, demo]
+        createdAt:
+          type: string
+        closedAt:
+          type: ["string", "null"]
+      required: [id, symbol, assetName, side, orderType, quantity, price, status, mode, createdAt]
+
+    TradeInput:
+      type: object
+      properties:
+        symbol:
+          type: string
+        side:
+          type: string
+          enum: [buy, sell]
+        orderType:
+          type: string
+          enum: [market, limit, stop_loss, take_profit]
+        quantity:
+          type: number
+        price:
+          type: number
+        stopLoss:
+          type: ["number", "null"]
+        takeProfit:
+          type: ["number", "null"]
+        mode:
+          type: string
+          enum: [real, demo]
+      required: [symbol, side, orderType, quantity, price, mode]
+
+    Asset:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+          enum: [crypto, forex, stocks, commodities]
+        currentPrice:
+          type: number
+        change24h:
+          type: number
+        change24hPercent:
+          type: number
+        volume24h:
+          type: number
+        logoUrl:
+          type: ["string", "null"]
+      required: [symbol, name, category, currentPrice, change24h, change24hPercent, volume24h]
+
+    AssetPrice:
+      type: object
+      properties:
+        symbol:
+          type: string
+        price:
+          type: number
+        bid:
+          type: number
+        ask:
+          type: number
+        change24h:
+          type: number
+        change24hPercent:
+          type: number
+        high24h:
+          type: number
+        low24h:
+          type: number
+        volume24h:
+          type: number
+        updatedAt:
+          type: string
+      required: [symbol, price, bid, ask, change24h, change24hPercent, high24h, low24h, volume24h, updatedAt]
+
+    Candle:
+      type: object
+      properties:
+        time:
+          type: integer
+        open:
+          type: number
+        high:
+          type: number
+        low:
+          type: number
+        close:
+          type: number
+        volume:
+          type: number
+      required: [time, open, high, low, close, volume]
+
+    WatchlistItem:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        currentPrice:
+          type: number
+        change24h:
+          type: number
+        change24hPercent:
+          type: number
+      required: [symbol, name, category, currentPrice, change24h, change24hPercent]
+
+    WatchlistInput:
+      type: object
+      properties:
+        symbol:
+          type: string
+      required: [symbol]
