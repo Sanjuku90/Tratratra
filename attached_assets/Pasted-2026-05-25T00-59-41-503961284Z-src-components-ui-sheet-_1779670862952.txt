@@ -1,0 +1,50 @@
+2026-05-25T00:59:41.503961284Z src/components/ui/sheet.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+2026-05-25T00:59:43.80022915Z ✓ 2521 modules transformed.
+2026-05-25T00:59:44.282332877Z rendering chunks...
+2026-05-25T00:59:44.296082046Z computing gzip size...
+2026-05-25T00:59:44.325467083Z dist/public/index.html                     1.41 kB │ gzip:   0.55 kB
+2026-05-25T00:59:44.325479134Z dist/public/assets/index-DRj6ISJM.css    108.82 kB │ gzip:  17.24 kB
+2026-05-25T00:59:44.325496566Z dist/public/assets/index-D_a-yZp5.js   1,107.72 kB │ gzip: 324.62 kB
+2026-05-25T00:59:44.325541089Z 
+2026-05-25T00:59:44.3255458Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2026-05-25T00:59:44.32554905Z - Using dynamic import() to code-split the application
+2026-05-25T00:59:44.32555238Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2026-05-25T00:59:44.32555511Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2026-05-25T00:59:44.325740345Z ✓ built in 5.05s
+2026-05-25T00:59:45.052415594Z 
+2026-05-25T00:59:45.052436776Z > @workspace/api-server@0.0.0 build /opt/render/project/src/artifacts/api-server
+2026-05-25T00:59:45.052441196Z > node ./build.mjs
+2026-05-25T00:59:45.052443816Z 
+2026-05-25T00:59:45.547695292Z 
+2026-05-25T00:59:45.547717044Z   dist/index.mjs                       2.4mb ⚠️
+2026-05-25T00:59:45.547721564Z   dist/pino-worker.mjs               153.4kb
+2026-05-25T00:59:45.547723834Z   dist/pino-file.mjs                 142.1kb
+2026-05-25T00:59:45.547725985Z   dist/pino-pretty.mjs               114.6kb
+2026-05-25T00:59:45.547727955Z   dist/thread-stream-worker.mjs        7.3kb
+2026-05-25T00:59:45.547740036Z   dist/index.mjs.map                   4.4mb
+2026-05-25T00:59:45.547742156Z   dist/pino-worker.mjs.map           256.9kb
+2026-05-25T00:59:45.547744196Z   dist/pino-file.mjs.map             229.0kb
+2026-05-25T00:59:45.547746136Z   dist/pino-pretty.mjs.map           204.0kb
+2026-05-25T00:59:45.547748187Z   dist/thread-stream-worker.mjs.map   12.0kb
+2026-05-25T00:59:45.547750107Z 
+2026-05-25T00:59:45.547752617Z ⚡ Done in 440ms
+2026-05-25T00:59:47.085469112Z ==> Uploading build...
+2026-05-25T00:59:57.773266909Z ==> Uploaded in 6.3s. Compression took 4.4s
+2026-05-25T00:59:57.798550662Z ==> Build successful 🎉
+2026-05-25T01:00:07.468933388Z ==> Deploying...
+2026-05-25T01:00:07.593369602Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-05-25T01:00:30.856328928Z ==> Running 'node --enable-source-maps artifacts/api-server/dist/index.mjs'
+2026-05-25T01:00:35.346533911Z {"level":50,"time":1779670834198,"pid":70,"hostname":"srv-d89phbbbc2fs73ffab20-hibernate-5d7bc858c7-9lljr","err":{"type":"_DrizzleQueryError","message":"Failed query: select count(*) from \"assets\"\nparams: : SQLITE_UNKNOWN: SQLite error: no such table: assets: SQLite error: no such table: assets","stack":"Error: Failed query: select count(*) from \"assets\"\nparams: \n    at LibSQLPreparedQuery.queryWithCache (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/sqlite-core/session.ts:80:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async LibSQLPreparedQuery.values (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/libsql/session.ts:286:10)\n    at async LibSQLPreparedQuery.all (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/libsql/session.ts:214:16)\n    at async seedDatabase (/opt/render/project/src/artifacts/api-server/src/lib/seed.ts:8:19)\n    at async <anonymous> (/opt/render/project/src/artifacts/api-server/src/index.ts:19:1)\ncaused by: LibsqlError: SQLITE_UNKNOWN: SQLite error: no such table: assets\n    at mapHranaError (file:///opt/render/project/src/node_modules/.pnpm/@libsql+client@0.17.3/node_modules/@libsql/client/lib-esm/hrana.js:310:16)\n    at file:///opt/render/project/src/node_modules/.pnpm/@libsql+client@0.17.3/node_modules/@libsql/client/lib-esm/http.js:86:23\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async LibSQLPreparedQuery.queryWithCache (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/sqlite-core/session.ts:78:12)\n    at async LibSQLPreparedQuery.values (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/libsql/session.ts:286:10)\n    at async LibSQLPreparedQuery.all (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/libsql/session.ts:214:16)\n    at async seedDatabase (/opt/render/project/src/artifacts/api-server/src/lib/seed.ts:8:19)\n    at async <anonymous> (/opt/render/project/src/artifacts/api-server/src/index.ts:19:1)\ncaused by: ","query":"select count(*) from \"assets\"","params":[]},"msg":"Failed to seed database — continuing anyway"}
+2026-05-25T01:00:35.347815325Z {"level":30,"time":1779670835346,"pid":70,"hostname":"srv-d89phbbbc2fs73ffab20-hibernate-5d7bc858c7-9lljr","port":10000,"msg":"Server listening"}
+2026-05-25T01:00:35.951412523Z {"level":30,"time":1779670835949,"pid":70,"hostname":"srv-d89phbbbc2fs73ffab20-hibernate-5d7bc858c7-9lljr","req":{"id":1,"method":"HEAD","url":"/"},"res":{"statusCode":500},"err":{"type":"Error","message":"failed with status code 500","stack":"Error: failed with status code 500\n    at onResFinished (/opt/render/project/src/node_modules/.pnpm/pino-http@10.5.0/node_modules/pino-http/logger.js:115:39)\n    at ServerResponse.onResponseComplete (/opt/render/project/src/node_modules/.pnpm/pino-http@10.5.0/node_modules/pino-http/logger.js:178:14)\n    at ServerResponse.emit (node:events:520:35)\n    at onFinish (node:_http_outgoing:1026:10)\n    at afterWrite (node:internal/streams/writable:708:5)\n    at afterWriteTick (node:internal/streams/writable:694:10)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)"},"responseTime":20,"msg":"request errored"}
+2026-05-25T01:00:35.951705248Z Error: Missing Clerk Secret Key. Go to https://dashboard.clerk.com and get your key for your instance.
+2026-05-25T01:00:35.951713219Z     at assertValidSecretKey (/opt/render/project/src/node_modules/.pnpm/@clerk+backend@3.4.13/node_modules/@clerk/backend/src/util/optionsAssertions.ts:5:11)
+2026-05-25T01:00:35.951717939Z     at authenticateRequest (/opt/render/project/src/node_modules/.pnpm/@clerk+backend@3.4.13/node_modules/@clerk/backend/src/tokens/request.ts:158:5)
+2026-05-25T01:00:35.951735399Z     at async middleware (/opt/render/project/src/node_modules/.pnpm/@clerk+express@2.1.21_express@5.2.1/node_modules/@clerk/express/src/authenticateRequest.ts:215:28)
+2026-05-25T01:00:41.049910588Z ==> Your service is live 🎉
+2026-05-25T01:00:41.191104849Z ==> 
+2026-05-25T01:00:41.438339203Z ==> ///////////////////////////////////////////////////////////
+2026-05-25T01:00:41.496613772Z ==> 
+2026-05-25T01:00:41.529952027Z ==> Available at your primary URL https://nexustrade-8929.onrender.com
+2026-05-25T01:00:41.532722347Z ==> 
+2026-05-25T01:00:41.535169352Z ==> ///////////////////////////////////////////////////////////
