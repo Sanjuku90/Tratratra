@@ -4,7 +4,7 @@ services:
     runtime: node
     region: frankfurt
     plan: free
-    buildCommand: "corepack enable pnpm && pnpm install --prod=false && PORT=3000 BASE_PATH=/ pnpm --filter @workspace/trading-platform run build && pnpm --filter @workspace/api-server run build"
+    buildCommand: "pnpm install --prod=false && PORT=3000 BASE_PATH=/ pnpm --filter @workspace/trading-platform run build && pnpm --filter @workspace/api-server run build"
     startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
     healthCheckPath: /api/healthz
     envVars:
