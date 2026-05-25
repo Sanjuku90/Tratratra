@@ -20,11 +20,16 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AddProfitInput,
+  AdminAutoSubscription,
   AdminRejectInput,
   AdminTransaction,
   AdminUser,
   Asset,
   AssetPrice,
+  AutoSubscription,
+  AutoSubscriptionInput,
+  AutoTradingPlan,
   Candle,
   DepositInput,
   HealthStatus,
@@ -1401,6 +1406,522 @@ export const useAddToWatchlist = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getAddToWatchlistMutationOptions(options));
+    }
+
+export const getGetAutoTradingPlansUrl = () => {
+
+
+
+
+  return `/api/auto-trading/plans`
+}
+
+/**
+ * @summary Get available auto-trading plans
+ */
+export const getAutoTradingPlans = async ( options?: RequestInit): Promise<AutoTradingPlan[]> => {
+
+  return customFetch<AutoTradingPlan[]>(getGetAutoTradingPlansUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAutoTradingPlansQueryKey = () => {
+    return [
+    `/api/auto-trading/plans`
+    ] as const;
+    }
+
+
+export const getGetAutoTradingPlansQueryOptions = <TData = Awaited<ReturnType<typeof getAutoTradingPlans>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAutoTradingPlans>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAutoTradingPlansQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAutoTradingPlans>>> = ({ signal }) => getAutoTradingPlans({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAutoTradingPlans>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAutoTradingPlansQueryResult = NonNullable<Awaited<ReturnType<typeof getAutoTradingPlans>>>
+export type GetAutoTradingPlansQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get available auto-trading plans
+ */
+
+export function useGetAutoTradingPlans<TData = Awaited<ReturnType<typeof getAutoTradingPlans>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAutoTradingPlans>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAutoTradingPlansQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetMyAutoSubscriptionsUrl = () => {
+
+
+
+
+  return `/api/auto-trading/subscriptions`
+}
+
+/**
+ * @summary Get current user's auto-trading subscriptions
+ */
+export const getMyAutoSubscriptions = async ( options?: RequestInit): Promise<AutoSubscription[]> => {
+
+  return customFetch<AutoSubscription[]>(getGetMyAutoSubscriptionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyAutoSubscriptionsQueryKey = () => {
+    return [
+    `/api/auto-trading/subscriptions`
+    ] as const;
+    }
+
+
+export const getGetMyAutoSubscriptionsQueryOptions = <TData = Awaited<ReturnType<typeof getMyAutoSubscriptions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyAutoSubscriptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyAutoSubscriptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyAutoSubscriptions>>> = ({ signal }) => getMyAutoSubscriptions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyAutoSubscriptions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyAutoSubscriptionsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyAutoSubscriptions>>>
+export type GetMyAutoSubscriptionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current user's auto-trading subscriptions
+ */
+
+export function useGetMyAutoSubscriptions<TData = Awaited<ReturnType<typeof getMyAutoSubscriptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyAutoSubscriptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyAutoSubscriptionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateAutoSubscriptionUrl = () => {
+
+
+
+
+  return `/api/auto-trading/subscriptions`
+}
+
+/**
+ * @summary Subscribe to an auto-trading plan
+ */
+export const createAutoSubscription = async (autoSubscriptionInput: AutoSubscriptionInput, options?: RequestInit): Promise<AutoSubscription> => {
+
+  return customFetch<AutoSubscription>(getCreateAutoSubscriptionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      autoSubscriptionInput,)
+  }
+);}
+
+
+
+
+export const getCreateAutoSubscriptionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAutoSubscription>>, TError,{data: BodyType<AutoSubscriptionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createAutoSubscription>>, TError,{data: BodyType<AutoSubscriptionInput>}, TContext> => {
+
+const mutationKey = ['createAutoSubscription'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAutoSubscription>>, {data: BodyType<AutoSubscriptionInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createAutoSubscription(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateAutoSubscriptionMutationResult = NonNullable<Awaited<ReturnType<typeof createAutoSubscription>>>
+    export type CreateAutoSubscriptionMutationBody = BodyType<AutoSubscriptionInput>
+    export type CreateAutoSubscriptionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Subscribe to an auto-trading plan
+ */
+export const useCreateAutoSubscription = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAutoSubscription>>, TError,{data: BodyType<AutoSubscriptionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createAutoSubscription>>,
+        TError,
+        {data: BodyType<AutoSubscriptionInput>},
+        TContext
+      > => {
+      return useMutation(getCreateAutoSubscriptionMutationOptions(options));
+    }
+
+export const getAdminGetAutoSubscriptionsUrl = () => {
+
+
+
+
+  return `/api/admin/auto-subscriptions`
+}
+
+/**
+ * @summary Get all auto-trading subscriptions (admin)
+ */
+export const adminGetAutoSubscriptions = async ( options?: RequestInit): Promise<AdminAutoSubscription[]> => {
+
+  return customFetch<AdminAutoSubscription[]>(getAdminGetAutoSubscriptionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetAutoSubscriptionsQueryKey = () => {
+    return [
+    `/api/admin/auto-subscriptions`
+    ] as const;
+    }
+
+
+export const getAdminGetAutoSubscriptionsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetAutoSubscriptions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetAutoSubscriptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetAutoSubscriptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetAutoSubscriptions>>> = ({ signal }) => adminGetAutoSubscriptions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetAutoSubscriptions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminGetAutoSubscriptionsQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetAutoSubscriptions>>>
+export type AdminGetAutoSubscriptionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get all auto-trading subscriptions (admin)
+ */
+
+export function useAdminGetAutoSubscriptions<TData = Awaited<ReturnType<typeof adminGetAutoSubscriptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetAutoSubscriptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminGetAutoSubscriptionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAdminActivateAutoSubscriptionUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/auto-subscriptions/${id}/activate`
+}
+
+/**
+ * @summary Activate a pending auto-trading subscription
+ */
+export const adminActivateAutoSubscription = async (id: number, options?: RequestInit): Promise<AdminAutoSubscription> => {
+
+  return customFetch<AdminAutoSubscription>(getAdminActivateAutoSubscriptionUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getAdminActivateAutoSubscriptionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminActivateAutoSubscription>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminActivateAutoSubscription>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['adminActivateAutoSubscription'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminActivateAutoSubscription>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  adminActivateAutoSubscription(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminActivateAutoSubscriptionMutationResult = NonNullable<Awaited<ReturnType<typeof adminActivateAutoSubscription>>>
+
+    export type AdminActivateAutoSubscriptionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Activate a pending auto-trading subscription
+ */
+export const useAdminActivateAutoSubscription = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminActivateAutoSubscription>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminActivateAutoSubscription>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getAdminActivateAutoSubscriptionMutationOptions(options));
+    }
+
+export const getAdminAddProfitUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/auto-subscriptions/${id}/add-profit`
+}
+
+/**
+ * @summary Add simulated profit to a subscription
+ */
+export const adminAddProfit = async (id: number,
+    addProfitInput: AddProfitInput, options?: RequestInit): Promise<AdminAutoSubscription> => {
+
+  return customFetch<AdminAutoSubscription>(getAdminAddProfitUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      addProfitInput,)
+  }
+);}
+
+
+
+
+export const getAdminAddProfitMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminAddProfit>>, TError,{id: number;data: BodyType<AddProfitInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminAddProfit>>, TError,{id: number;data: BodyType<AddProfitInput>}, TContext> => {
+
+const mutationKey = ['adminAddProfit'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminAddProfit>>, {id: number;data: BodyType<AddProfitInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  adminAddProfit(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminAddProfitMutationResult = NonNullable<Awaited<ReturnType<typeof adminAddProfit>>>
+    export type AdminAddProfitMutationBody = BodyType<AddProfitInput>
+    export type AdminAddProfitMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Add simulated profit to a subscription
+ */
+export const useAdminAddProfit = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminAddProfit>>, TError,{id: number;data: BodyType<AddProfitInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminAddProfit>>,
+        TError,
+        {id: number;data: BodyType<AddProfitInput>},
+        TContext
+      > => {
+      return useMutation(getAdminAddProfitMutationOptions(options));
+    }
+
+export const getAdminCancelAutoSubscriptionUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/auto-subscriptions/${id}/cancel`
+}
+
+/**
+ * @summary Cancel an auto-trading subscription
+ */
+export const adminCancelAutoSubscription = async (id: number,
+    adminRejectInput?: AdminRejectInput, options?: RequestInit): Promise<AdminAutoSubscription> => {
+
+  return customFetch<AdminAutoSubscription>(getAdminCancelAutoSubscriptionUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminRejectInput,)
+  }
+);}
+
+
+
+
+export const getAdminCancelAutoSubscriptionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelAutoSubscription>>, TError,{id: number;data?: BodyType<AdminRejectInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminCancelAutoSubscription>>, TError,{id: number;data?: BodyType<AdminRejectInput>}, TContext> => {
+
+const mutationKey = ['adminCancelAutoSubscription'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCancelAutoSubscription>>, {id: number;data?: BodyType<AdminRejectInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  adminCancelAutoSubscription(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCancelAutoSubscriptionMutationResult = NonNullable<Awaited<ReturnType<typeof adminCancelAutoSubscription>>>
+    export type AdminCancelAutoSubscriptionMutationBody = BodyType<AdminRejectInput> | undefined
+    export type AdminCancelAutoSubscriptionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Cancel an auto-trading subscription
+ */
+export const useAdminCancelAutoSubscription = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelAutoSubscription>>, TError,{id: number;data?: BodyType<AdminRejectInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminCancelAutoSubscription>>,
+        TError,
+        {id: number;data?: BodyType<AdminRejectInput>},
+        TContext
+      > => {
+      return useMutation(getAdminCancelAutoSubscriptionMutationOptions(options));
     }
 
 export const getAdminGetTransactionsUrl = () => {

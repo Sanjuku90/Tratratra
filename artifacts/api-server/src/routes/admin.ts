@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { db, usersTable, transactionsTable } from "@workspace/db";
-import { eq, and, or, inArray, desc } from "drizzle-orm";
+import { db, usersTable, transactionsTable, autoSubscriptionsTable } from "@workspace/db";
+import { eq, and, inArray, desc } from "drizzle-orm";
 import { requireAuth, getOrCreateUser } from "../lib/auth";
+import { mapSub } from "./auto-trading";
 
 const router = Router();
 
@@ -260,6 +261,130 @@ router.patch("/admin/users/:id/toggle-admin", requireAuth, requireAdmin, async (
       isAdmin: updated.isAdmin,
       createdAt: updated.createdAt.toISOString(),
     });
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ─── AUTO SUBSCRIPTIONS (ADMIN) ──────────────────────────────────────────────
+
+// GET /api/admin/auto-subscriptions
+router.get("/admin/auto-subscriptions", requireAuth, requireAdmin, async (_req, res) => {
+  try {
+    const subs = await db
+      .select({
+        id: autoSubscriptionsTable.id,
+        planId: autoSubscriptionsTable.planId,
+        planName: autoSubscriptionsTable.planName,
+        amount: autoSubscriptionsTable.amount,
+        riskLevel: autoSubscriptionsTable.riskLevel,
+        targetAssets: autoSubscriptionsTable.targetAssets,
+        durationMonths: autoSubscriptionsTable.durationMonths,
+        status: autoSubscriptionsTable.status,
+        currentProfit: autoSubscriptionsTable.currentProfit,
+        adminNote: autoSubscriptionsTable.adminNote,
+        activatedAt: autoSubscriptionsTable.activatedAt,
+        expiresAt: autoSubscriptionsTable.expiresAt,
+        createdAt: autoSubscriptionsTable.createdAt,
+        userId: autoSubscriptionsTable.userId,
+        userEmail: usersTable.email,
+        userDisplayName: usersTable.displayName,
+      })
+      .from(autoSubscriptionsTable)
+      .innerJoin(usersTable, eq(autoSubscriptionsTable.userId, usersTable.id))
+      .orderBy(desc(autoSubscriptionsTable.createdAt))
+      .limit(200);
+
+    res.json(
+      subs.map((s) => ({
+        ...mapSub({ ...s, adminNote: s.adminNote ?? null, activatedAt: s.activatedAt ?? null, expiresAt: s.expiresAt ?? null }),
+        userId: s.userId,
+        userEmail: s.userEmail,
+        userDisplayName: s.userDisplayName ?? null,
+      }))
+    );
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/admin/auto-subscriptions/:id/activate
+router.post("/admin/auto-subscriptions/:id/activate", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const subId = parseInt(req.params.id, 10);
+    const [sub] = await db
+      .select()
+      .from(autoSubscriptionsTable)
+      .where(eq(autoSubscriptionsTable.id, subId))
+      .limit(1);
+
+    if (!sub) return res.status(404).json({ error: "Subscription not found" });
+    if (sub.status !== "pending") return res.status(400).json({ error: "Subscription is not pending" });
+
+    const now = new Date();
+    const expiresAt = new Date(now);
+    expiresAt.setMonth(expiresAt.getMonth() + sub.durationMonths);
+
+    const [updated] = await db
+      .update(autoSubscriptionsTable)
+      .set({ status: "active", activatedAt: now, expiresAt, adminNote: "Activé par l'administrateur" })
+      .where(eq(autoSubscriptionsTable.id, subId))
+      .returning();
+
+    const [userRow] = await db.select({ email: usersTable.email, displayName: usersTable.displayName }).from(usersTable).where(eq(usersTable.id, updated.userId)).limit(1);
+
+    res.json({ ...mapSub(updated), userId: updated.userId, userEmail: userRow?.email ?? "", userDisplayName: userRow?.displayName ?? null });
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/admin/auto-subscriptions/:id/add-profit
+router.post("/admin/auto-subscriptions/:id/add-profit", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const subId = parseInt(req.params.id, 10);
+    const profit = parseFloat(req.body?.profit ?? 0);
+    const note = req.body?.note ?? null;
+
+    if (isNaN(profit)) return res.status(400).json({ error: "Invalid profit value" });
+
+    const [sub] = await db.select().from(autoSubscriptionsTable).where(eq(autoSubscriptionsTable.id, subId)).limit(1);
+    if (!sub) return res.status(404).json({ error: "Subscription not found" });
+
+    const newProfit = parseFloat(sub.currentProfit) + profit;
+
+    const [updated] = await db
+      .update(autoSubscriptionsTable)
+      .set({ currentProfit: newProfit.toString(), adminNote: note ?? sub.adminNote })
+      .where(eq(autoSubscriptionsTable.id, subId))
+      .returning();
+
+    const [userRow] = await db.select({ email: usersTable.email, displayName: usersTable.displayName }).from(usersTable).where(eq(usersTable.id, updated.userId)).limit(1);
+
+    res.json({ ...mapSub(updated), userId: updated.userId, userEmail: userRow?.email ?? "", userDisplayName: userRow?.displayName ?? null });
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/admin/auto-subscriptions/:id/cancel
+router.post("/admin/auto-subscriptions/:id/cancel", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const subId = parseInt(req.params.id, 10);
+    const note: string = req.body?.note ?? "Annulé par l'administrateur";
+
+    const [sub] = await db.select().from(autoSubscriptionsTable).where(eq(autoSubscriptionsTable.id, subId)).limit(1);
+    if (!sub) return res.status(404).json({ error: "Subscription not found" });
+
+    const [updated] = await db
+      .update(autoSubscriptionsTable)
+      .set({ status: "cancelled", adminNote: note })
+      .where(eq(autoSubscriptionsTable.id, subId))
+      .returning();
+
+    const [userRow] = await db.select({ email: usersTable.email, displayName: usersTable.displayName }).from(usersTable).where(eq(usersTable.id, updated.userId)).limit(1);
+
+    res.json({ ...mapSub(updated), userId: updated.userId, userEmail: userRow?.email ?? "", userDisplayName: userRow?.displayName ?? null });
   } catch {
     res.status(500).json({ error: "Internal server error" });
   }

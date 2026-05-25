@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './addProfitInput';
+export * from './adminAutoSubscription';
+export * from './adminAutoSubscriptionStatus';
 export * from './adminRejectInput';
 export * from './adminTransaction';
 export * from './adminTransactionStatus';
@@ -15,6 +18,15 @@ export * from './adminUserTradingMode';
 export * from './asset';
 export * from './assetCategory';
 export * from './assetPrice';
+export * from './autoSubscription';
+export * from './autoSubscriptionInput';
+export * from './autoSubscriptionInputPlanId';
+export * from './autoSubscriptionInputRiskLevel';
+export * from './autoSubscriptionInputTargetAssets';
+export * from './autoSubscriptionRiskLevel';
+export * from './autoSubscriptionStatus';
+export * from './autoSubscriptionTargetAssets';
+export * from './autoTradingPlan';
 export * from './candle';
 export * from './depositInput';
 export * from './depositInputMethod';

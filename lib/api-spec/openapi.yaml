@@ -21,6 +21,8 @@ tags:
     description: Wallet and deposits
   - name: admin
     description: Admin operations
+  - name: auto-trading
+    description: Automatic trading plans and subscriptions
 
 paths:
   /healthz:
@@ -340,6 +342,137 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/WatchlistItem"
+
+  /auto-trading/plans:
+    get:
+      operationId: getAutoTradingPlans
+      tags: [auto-trading]
+      summary: Get available auto-trading plans
+      responses:
+        "200":
+          description: Plans list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AutoTradingPlan"
+
+  /auto-trading/subscriptions:
+    get:
+      operationId: getMyAutoSubscriptions
+      tags: [auto-trading]
+      summary: Get current user's auto-trading subscriptions
+      responses:
+        "200":
+          description: User subscriptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AutoSubscription"
+    post:
+      operationId: createAutoSubscription
+      tags: [auto-trading]
+      summary: Subscribe to an auto-trading plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AutoSubscriptionInput"
+      responses:
+        "201":
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoSubscription"
+
+  /admin/auto-subscriptions:
+    get:
+      operationId: adminGetAutoSubscriptions
+      tags: [admin]
+      summary: Get all auto-trading subscriptions (admin)
+      responses:
+        "200":
+          description: All subscriptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminAutoSubscription"
+
+  /admin/auto-subscriptions/{id}/activate:
+    post:
+      operationId: adminActivateAutoSubscription
+      tags: [admin]
+      summary: Activate a pending auto-trading subscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Subscription activated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAutoSubscription"
+
+  /admin/auto-subscriptions/{id}/add-profit:
+    post:
+      operationId: adminAddProfit
+      tags: [admin]
+      summary: Add simulated profit to a subscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddProfitInput"
+      responses:
+        "200":
+          description: Profit added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAutoSubscription"
+
+  /admin/auto-subscriptions/{id}/cancel:
+    post:
+      operationId: adminCancelAutoSubscription
+      tags: [admin]
+      summary: Cancel an auto-trading subscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminRejectInput"
+      responses:
+        "200":
+          description: Subscription cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAutoSubscription"
 
   /admin/transactions:
     get:
@@ -814,6 +947,128 @@ components:
         createdAt:
           type: string
       required: [id, email, tradingMode, realBalance, demoBalance, isAdmin, createdAt]
+
+    AutoTradingPlan:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        minDeposit:
+          type: number
+        monthlyReturnMin:
+          type: number
+        monthlyReturnMax:
+          type: number
+        description:
+          type: string
+        color:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+      required: [id, name, minDeposit, monthlyReturnMin, monthlyReturnMax, description, color, features]
+
+    AutoSubscription:
+      type: object
+      properties:
+        id:
+          type: integer
+        planId:
+          type: string
+        planName:
+          type: string
+        amount:
+          type: number
+        riskLevel:
+          type: string
+          enum: [conservative, moderate, aggressive]
+        targetAssets:
+          type: string
+          enum: [crypto, forex, stocks, mixed]
+        durationMonths:
+          type: integer
+        status:
+          type: string
+          enum: [pending, active, paused, completed, cancelled]
+        currentProfit:
+          type: number
+        adminNote:
+          type: ["string", "null"]
+        activatedAt:
+          type: ["string", "null"]
+        expiresAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, planId, planName, amount, riskLevel, targetAssets, durationMonths, status, currentProfit, createdAt]
+
+    AutoSubscriptionInput:
+      type: object
+      properties:
+        planId:
+          type: string
+          enum: [starter, pro, elite, vip]
+        amount:
+          type: number
+        riskLevel:
+          type: string
+          enum: [conservative, moderate, aggressive]
+        targetAssets:
+          type: string
+          enum: [crypto, forex, stocks, mixed]
+        durationMonths:
+          type: integer
+      required: [planId, amount, riskLevel, targetAssets, durationMonths]
+
+    AdminAutoSubscription:
+      type: object
+      properties:
+        id:
+          type: integer
+        planId:
+          type: string
+        planName:
+          type: string
+        amount:
+          type: number
+        riskLevel:
+          type: string
+        targetAssets:
+          type: string
+        durationMonths:
+          type: integer
+        status:
+          type: string
+          enum: [pending, active, paused, completed, cancelled]
+        currentProfit:
+          type: number
+        adminNote:
+          type: ["string", "null"]
+        activatedAt:
+          type: ["string", "null"]
+        expiresAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        userId:
+          type: integer
+        userEmail:
+          type: string
+        userDisplayName:
+          type: ["string", "null"]
+      required: [id, planId, planName, amount, riskLevel, targetAssets, durationMonths, status, currentProfit, createdAt, userId, userEmail]
+
+    AddProfitInput:
+      type: object
+      properties:
+        profit:
+          type: number
+        note:
+          type: string
+      required: [profit]
 
     WatchlistInput:
       type: object

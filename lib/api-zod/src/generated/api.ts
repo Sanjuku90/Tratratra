@@ -323,6 +323,169 @@ export const AddToWatchlistBody = zod.object({
 
 
 /**
+ * @summary Get available auto-trading plans
+ */
+export const GetAutoTradingPlansResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "minDeposit": zod.number(),
+  "monthlyReturnMin": zod.number(),
+  "monthlyReturnMax": zod.number(),
+  "description": zod.string(),
+  "color": zod.string(),
+  "features": zod.array(zod.string())
+})
+export const GetAutoTradingPlansResponse = zod.array(GetAutoTradingPlansResponseItem)
+
+
+/**
+ * @summary Get current user's auto-trading subscriptions
+ */
+export const GetMyAutoSubscriptionsResponseItem = zod.object({
+  "id": zod.number(),
+  "planId": zod.string(),
+  "planName": zod.string(),
+  "amount": zod.number(),
+  "riskLevel": zod.enum(['conservative', 'moderate', 'aggressive']),
+  "targetAssets": zod.enum(['crypto', 'forex', 'stocks', 'mixed']),
+  "durationMonths": zod.number(),
+  "status": zod.enum(['pending', 'active', 'paused', 'completed', 'cancelled']),
+  "currentProfit": zod.number(),
+  "adminNote": zod.string().nullish(),
+  "activatedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const GetMyAutoSubscriptionsResponse = zod.array(GetMyAutoSubscriptionsResponseItem)
+
+
+/**
+ * @summary Subscribe to an auto-trading plan
+ */
+export const CreateAutoSubscriptionBody = zod.object({
+  "planId": zod.enum(['starter', 'pro', 'elite', 'vip']),
+  "amount": zod.number(),
+  "riskLevel": zod.enum(['conservative', 'moderate', 'aggressive']),
+  "targetAssets": zod.enum(['crypto', 'forex', 'stocks', 'mixed']),
+  "durationMonths": zod.number()
+})
+
+
+/**
+ * @summary Get all auto-trading subscriptions (admin)
+ */
+export const AdminGetAutoSubscriptionsResponseItem = zod.object({
+  "id": zod.number(),
+  "planId": zod.string(),
+  "planName": zod.string(),
+  "amount": zod.number(),
+  "riskLevel": zod.string(),
+  "targetAssets": zod.string(),
+  "durationMonths": zod.number(),
+  "status": zod.enum(['pending', 'active', 'paused', 'completed', 'cancelled']),
+  "currentProfit": zod.number(),
+  "adminNote": zod.string().nullish(),
+  "activatedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "userId": zod.number(),
+  "userEmail": zod.string(),
+  "userDisplayName": zod.string().nullish()
+})
+export const AdminGetAutoSubscriptionsResponse = zod.array(AdminGetAutoSubscriptionsResponseItem)
+
+
+/**
+ * @summary Activate a pending auto-trading subscription
+ */
+export const AdminActivateAutoSubscriptionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminActivateAutoSubscriptionResponse = zod.object({
+  "id": zod.number(),
+  "planId": zod.string(),
+  "planName": zod.string(),
+  "amount": zod.number(),
+  "riskLevel": zod.string(),
+  "targetAssets": zod.string(),
+  "durationMonths": zod.number(),
+  "status": zod.enum(['pending', 'active', 'paused', 'completed', 'cancelled']),
+  "currentProfit": zod.number(),
+  "adminNote": zod.string().nullish(),
+  "activatedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "userId": zod.number(),
+  "userEmail": zod.string(),
+  "userDisplayName": zod.string().nullish()
+})
+
+
+/**
+ * @summary Add simulated profit to a subscription
+ */
+export const AdminAddProfitParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminAddProfitBody = zod.object({
+  "profit": zod.number(),
+  "note": zod.string().optional()
+})
+
+export const AdminAddProfitResponse = zod.object({
+  "id": zod.number(),
+  "planId": zod.string(),
+  "planName": zod.string(),
+  "amount": zod.number(),
+  "riskLevel": zod.string(),
+  "targetAssets": zod.string(),
+  "durationMonths": zod.number(),
+  "status": zod.enum(['pending', 'active', 'paused', 'completed', 'cancelled']),
+  "currentProfit": zod.number(),
+  "adminNote": zod.string().nullish(),
+  "activatedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "userId": zod.number(),
+  "userEmail": zod.string(),
+  "userDisplayName": zod.string().nullish()
+})
+
+
+/**
+ * @summary Cancel an auto-trading subscription
+ */
+export const AdminCancelAutoSubscriptionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminCancelAutoSubscriptionBody = zod.object({
+  "note": zod.string().optional()
+})
+
+export const AdminCancelAutoSubscriptionResponse = zod.object({
+  "id": zod.number(),
+  "planId": zod.string(),
+  "planName": zod.string(),
+  "amount": zod.number(),
+  "riskLevel": zod.string(),
+  "targetAssets": zod.string(),
+  "durationMonths": zod.number(),
+  "status": zod.enum(['pending', 'active', 'paused', 'completed', 'cancelled']),
+  "currentProfit": zod.number(),
+  "adminNote": zod.string().nullish(),
+  "activatedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "userId": zod.number(),
+  "userEmail": zod.string(),
+  "userDisplayName": zod.string().nullish()
+})
+
+
+/**
  * @summary Get all pending deposit/withdrawal transactions with user info
  */
 export const AdminGetTransactionsResponseItem = zod.object({

@@ -384,6 +384,142 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface AutoTradingPlan {
+  id: string;
+  name: string;
+  minDeposit: number;
+  monthlyReturnMin: number;
+  monthlyReturnMax: number;
+  description: string;
+  color: string;
+  features: string[];
+}
+
+export type AutoSubscriptionRiskLevel = typeof AutoSubscriptionRiskLevel[keyof typeof AutoSubscriptionRiskLevel];
+
+
+export const AutoSubscriptionRiskLevel = {
+  conservative: 'conservative',
+  moderate: 'moderate',
+  aggressive: 'aggressive',
+} as const;
+
+export type AutoSubscriptionTargetAssets = typeof AutoSubscriptionTargetAssets[keyof typeof AutoSubscriptionTargetAssets];
+
+
+export const AutoSubscriptionTargetAssets = {
+  crypto: 'crypto',
+  forex: 'forex',
+  stocks: 'stocks',
+  mixed: 'mixed',
+} as const;
+
+export type AutoSubscriptionStatus = typeof AutoSubscriptionStatus[keyof typeof AutoSubscriptionStatus];
+
+
+export const AutoSubscriptionStatus = {
+  pending: 'pending',
+  active: 'active',
+  paused: 'paused',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface AutoSubscription {
+  id: number;
+  planId: string;
+  planName: string;
+  amount: number;
+  riskLevel: AutoSubscriptionRiskLevel;
+  targetAssets: AutoSubscriptionTargetAssets;
+  durationMonths: number;
+  status: AutoSubscriptionStatus;
+  currentProfit: number;
+  /** @nullable */
+  adminNote?: string | null;
+  /** @nullable */
+  activatedAt?: string | null;
+  /** @nullable */
+  expiresAt?: string | null;
+  createdAt: string;
+}
+
+export type AutoSubscriptionInputPlanId = typeof AutoSubscriptionInputPlanId[keyof typeof AutoSubscriptionInputPlanId];
+
+
+export const AutoSubscriptionInputPlanId = {
+  starter: 'starter',
+  pro: 'pro',
+  elite: 'elite',
+  vip: 'vip',
+} as const;
+
+export type AutoSubscriptionInputRiskLevel = typeof AutoSubscriptionInputRiskLevel[keyof typeof AutoSubscriptionInputRiskLevel];
+
+
+export const AutoSubscriptionInputRiskLevel = {
+  conservative: 'conservative',
+  moderate: 'moderate',
+  aggressive: 'aggressive',
+} as const;
+
+export type AutoSubscriptionInputTargetAssets = typeof AutoSubscriptionInputTargetAssets[keyof typeof AutoSubscriptionInputTargetAssets];
+
+
+export const AutoSubscriptionInputTargetAssets = {
+  crypto: 'crypto',
+  forex: 'forex',
+  stocks: 'stocks',
+  mixed: 'mixed',
+} as const;
+
+export interface AutoSubscriptionInput {
+  planId: AutoSubscriptionInputPlanId;
+  amount: number;
+  riskLevel: AutoSubscriptionInputRiskLevel;
+  targetAssets: AutoSubscriptionInputTargetAssets;
+  durationMonths: number;
+}
+
+export type AdminAutoSubscriptionStatus = typeof AdminAutoSubscriptionStatus[keyof typeof AdminAutoSubscriptionStatus];
+
+
+export const AdminAutoSubscriptionStatus = {
+  pending: 'pending',
+  active: 'active',
+  paused: 'paused',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface AdminAutoSubscription {
+  id: number;
+  planId: string;
+  planName: string;
+  amount: number;
+  riskLevel: string;
+  targetAssets: string;
+  durationMonths: number;
+  status: AdminAutoSubscriptionStatus;
+  currentProfit: number;
+  /** @nullable */
+  adminNote?: string | null;
+  /** @nullable */
+  activatedAt?: string | null;
+  /** @nullable */
+  expiresAt?: string | null;
+  createdAt: string;
+  userId: number;
+  userEmail: string;
+  /** @nullable */
+  userDisplayName?: string | null;
+}
+
+export interface AddProfitInput {
+  profit: number;
+  note?: string;
+}
+
 export interface WatchlistInput {
   symbol: string;
 }

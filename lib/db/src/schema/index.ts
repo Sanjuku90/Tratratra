@@ -3,3 +3,4 @@ export * from "./assets";
 export * from "./trades";
 export * from "./transactions";
 export * from "./watchlist";
+export * from "./auto-subscriptions";

@@ -11,6 +11,7 @@ import {
   LogOut,
   ChevronDown,
   Shield,
+  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,8 +29,8 @@ interface LayoutProps {
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/market", label: "Marchés", icon: LineChart },
+  { href: "/auto-trading", label: "Auto-Trade", icon: Bot },
   { href: "/portfolio", label: "Portfolio", icon: PieChart },
-  { href: "/trades", label: "Trades", icon: History },
   { href: "/wallet", label: "Wallet", icon: Wallet },
 ];
 

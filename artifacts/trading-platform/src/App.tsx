@@ -17,6 +17,7 @@ import TradesPage from "@/pages/trades";
 import WalletPage from "@/pages/wallet";
 import SettingsPage from "@/pages/settings";
 import AdminPage from "@/pages/admin";
+import AutoTradingPage from "@/pages/auto-trading";
 
 const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
@@ -191,6 +192,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/wallet"><AuthRoute component={WalletPage} /></Route>
             <Route path="/settings"><AuthRoute component={SettingsPage} /></Route>
             <Route path="/admin"><AuthRoute component={AdminPage} /></Route>
+            <Route path="/auto-trading"><AuthRoute component={AutoTradingPage} /></Route>
 
             <Route component={NotFound} />
           </Switch>

@@ -6,6 +6,7 @@ import marketRouter from "./market";
 import tradesRouter from "./trades";
 import portfolioRouter from "./portfolio";
 import adminRouter from "./admin";
+import autoTradingRouter from "./auto-trading";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(marketRouter);
 router.use(tradesRouter);
 router.use(portfolioRouter);
 router.use(adminRouter);
+router.use(autoTradingRouter);
 
 export default router;
