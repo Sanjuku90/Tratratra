@@ -1,0 +1,50 @@
+2026-05-25T01:04:24.181689625Z src/components/ui/tooltip.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+2026-05-25T01:04:24.534503535Z src/components/ui/label.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+2026-05-25T01:04:24.684281936Z src/components/ui/dropdown-menu.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+2026-05-25T01:04:25.941725245Z src/components/ui/sheet.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+2026-05-25T01:04:28.257839468Z ✓ 2521 modules transformed.
+2026-05-25T01:04:28.739911402Z rendering chunks...
+2026-05-25T01:04:28.753690543Z computing gzip size...
+2026-05-25T01:04:28.78352044Z dist/public/index.html                     1.41 kB │ gzip:   0.55 kB
+2026-05-25T01:04:28.783535891Z dist/public/assets/index-DRj6ISJM.css    108.82 kB │ gzip:  17.24 kB
+2026-05-25T01:04:28.783590392Z dist/public/assets/index-DtnMVJyt.js   1,107.95 kB │ gzip: 324.77 kB
+2026-05-25T01:04:28.783608302Z 
+2026-05-25T01:04:28.783612883Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2026-05-25T01:04:28.783619693Z - Using dynamic import() to code-split the application
+2026-05-25T01:04:28.783624363Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2026-05-25T01:04:28.783628033Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2026-05-25T01:04:28.78391201Z ✓ built in 5.01s
+2026-05-25T01:04:29.517260324Z 
+2026-05-25T01:04:29.517277805Z > @workspace/api-server@0.0.0 build /opt/render/project/src/artifacts/api-server
+2026-05-25T01:04:29.517281645Z > node ./build.mjs
+2026-05-25T01:04:29.517284215Z 
+2026-05-25T01:04:30.075152123Z 
+2026-05-25T01:04:30.075174613Z   dist/index.mjs                       2.4mb ⚠️
+2026-05-25T01:04:30.075178393Z   dist/pino-worker.mjs               153.4kb
+2026-05-25T01:04:30.075181074Z   dist/pino-file.mjs                 142.1kb
+2026-05-25T01:04:30.075183604Z   dist/pino-pretty.mjs               114.6kb
+2026-05-25T01:04:30.075186174Z   dist/thread-stream-worker.mjs        7.3kb
+2026-05-25T01:04:30.075197604Z   dist/index.mjs.map                   4.4mb
+2026-05-25T01:04:30.075200154Z   dist/pino-worker.mjs.map           256.9kb
+2026-05-25T01:04:30.075202634Z   dist/pino-file.mjs.map             229.0kb
+2026-05-25T01:04:30.075205484Z   dist/pino-pretty.mjs.map           204.0kb
+2026-05-25T01:04:30.075208084Z   dist/thread-stream-worker.mjs.map   12.0kb
+2026-05-25T01:04:30.075210414Z 
+2026-05-25T01:04:30.075213585Z ⚡ Done in 504ms
+2026-05-25T01:04:31.598840011Z ==> Uploading build...
+2026-05-25T01:04:40.329861043Z ==> Uploaded in 4.8s. Compression took 3.9s
+2026-05-25T01:04:40.358137952Z ==> Build successful 🎉
+2026-05-25T01:04:42.803374288Z ==> Deploying...
+2026-05-25T01:04:42.918273729Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-05-25T01:05:03.197435647Z ==> Running 'node --enable-source-maps artifacts/api-server/dist/index.mjs'
+2026-05-25T01:05:07.599485856Z {"level":50,"time":1779671106515,"pid":71,"hostname":"srv-d89phbbbc2fs73ffab20-hibernate-67bf8d9ff9-bv5wz","err":{"type":"_DrizzleQueryError","message":"Failed query: select count(*) from \"assets\"\nparams: : SQLITE_UNKNOWN: SQLite error: no such table: assets: SQLite error: no such table: assets","stack":"Error: Failed query: select count(*) from \"assets\"\nparams: \n    at LibSQLPreparedQuery.queryWithCache (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/sqlite-core/session.ts:80:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async LibSQLPreparedQuery.values (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/libsql/session.ts:286:10)\n    at async LibSQLPreparedQuery.all (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/libsql/session.ts:214:16)\n    at async seedDatabase (/opt/render/project/src/artifacts/api-server/src/lib/seed.ts:8:19)\n    at async <anonymous> (/opt/render/project/src/artifacts/api-server/src/index.ts:19:1)\ncaused by: LibsqlError: SQLITE_UNKNOWN: SQLite error: no such table: assets\n    at mapHranaError (file:///opt/render/project/src/node_modules/.pnpm/@libsql+client@0.17.3/node_modules/@libsql/client/lib-esm/hrana.js:310:16)\n    at file:///opt/render/project/src/node_modules/.pnpm/@libsql+client@0.17.3/node_modules/@libsql/client/lib-esm/http.js:86:23\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async LibSQLPreparedQuery.queryWithCache (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/sqlite-core/session.ts:78:12)\n    at async LibSQLPreparedQuery.values (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/libsql/session.ts:286:10)\n    at async LibSQLPreparedQuery.all (/opt/render/project/src/node_modules/.pnpm/drizzle-orm@0.45.2_@libsql+client@0.17.3/node_modules/src/libsql/session.ts:214:16)\n    at async seedDatabase (/opt/render/project/src/artifacts/api-server/src/lib/seed.ts:8:19)\n    at async <anonymous> (/opt/render/project/src/artifacts/api-server/src/index.ts:19:1)\ncaused by: ","query":"select count(*) from \"assets\"","params":[]},"msg":"Failed to seed database — continuing anyway"}
+2026-05-25T01:05:07.601765742Z {"level":30,"time":1779671107600,"pid":71,"hostname":"srv-d89phbbbc2fs73ffab20-hibernate-67bf8d9ff9-bv5wz","port":10000,"msg":"Server listening"}
+2026-05-25T01:05:07.896806245Z {"level":30,"time":1779671107896,"pid":71,"hostname":"srv-d89phbbbc2fs73ffab20-hibernate-67bf8d9ff9-bv5wz","req":{"id":1,"method":"HEAD","url":"/"},"res":{"statusCode":200},"responseTime":67,"msg":"request completed"}
+2026-05-25T01:05:14.077858373Z ==> Your service is live 🎉
+2026-05-25T01:05:14.227307942Z {"level":30,"time":1779671114227,"pid":71,"hostname":"srv-d89phbbbc2fs73ffab20-hibernate-67bf8d9ff9-bv5wz","req":{"id":2,"method":"GET","url":"/"},"res":{"statusCode":200},"responseTime":5,"msg":"request completed"}
+2026-05-25T01:05:14.32828534Z ==> 
+2026-05-25T01:05:14.330924179Z ==> ///////////////////////////////////////////////////////////
+2026-05-25T01:05:14.333282682Z ==> 
+2026-05-25T01:05:14.335936873Z ==> Available at your primary URL https://nexustrade-8929.onrender.com
+2026-05-25T01:05:14.33801563Z ==> 
+2026-05-25T01:05:14.340109518Z ==> ///////////////////////////////////////////////////////////
