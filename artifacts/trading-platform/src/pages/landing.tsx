@@ -34,7 +34,7 @@ export default function LandingPage() {
             Precision Trading for <br className="hidden md:block"/> Serious Retail Traders
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Bloomberg Terminal meets modern fintech. High-contrast, information-dense, and lightning-fast. Practice with $10,000 demo funds or trade real money in one unified cockpit.
+            Bloomberg Terminal meets modern fintech. High-contrast, information-dense, and lightning-fast. Practice with $100,000 demo funds or trade real money in one unified cockpit.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
             <Link href="/sign-up">

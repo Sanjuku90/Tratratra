@@ -3,9 +3,18 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useGetMe, useGetPortfolio, useGetPortfolioSummary, useClosePosition } from "@workspace/api-client-react";
-import { TrendingUp, TrendingDown, BarChart2, Target, Activity, Layers, DollarSign } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { TrendingUp, TrendingDown, BarChart2, Target, Activity, Layers, DollarSign, LineChart } from "lucide-react";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -15,6 +24,11 @@ function fmtPrice(n: number) {
   if (n >= 1000) return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if (n >= 1) return n.toFixed(4);
   return n.toFixed(6);
+}
+
+function fmtDate(iso: string) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
 }
 
 function PnlBadge({ value }: { value: number }) {
@@ -67,6 +81,151 @@ function StatCard({
   );
 }
 
+type PnlPoint = { date: string; portfolioValue: number; pnl: number; label: string };
+type PnlHistory = {
+  points: PnlPoint[];
+  currentBalance: number;
+  totalPnl: number;
+  totalPnlPercent: number;
+  realizedPnl: number;
+  unrealizedPnl: number;
+};
+
+function CustomTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload as PnlPoint;
+  const isPositive = d.pnl >= 0;
+  return (
+    <div className="bg-card border border-border rounded-lg p-3 text-xs shadow-lg">
+      <p className="text-muted-foreground mb-1">{fmtDate(d.date)}</p>
+      <p className="font-mono font-semibold">${fmt(d.portfolioValue)}</p>
+      <p className={`font-mono ${isPositive ? "text-green-400" : "text-red-400"}`}>
+        P&L : {isPositive ? "+" : ""}${fmt(d.pnl)}
+      </p>
+      {d.label && d.label !== "Début" && d.label !== "Maintenant" && (
+        <p className="text-muted-foreground mt-1">{d.label}</p>
+      )}
+    </div>
+  );
+}
+
+function PnlChart({ mode }: { mode: "real" | "demo" }) {
+  const { data, isLoading } = useQuery<PnlHistory>({
+    queryKey: [`/api/portfolio/${mode}/pnl-history`],
+    queryFn: async () => {
+      const r = await fetch(`/api/portfolio/${mode}/pnl-history`);
+      if (!r.ok) throw new Error("Failed to fetch pnl history");
+      return r.json();
+    },
+    refetchInterval: 15000,
+  });
+
+  const points = data?.points ?? [];
+  const hasData = points.length > 1;
+  const isPositive = (data?.totalPnl ?? 0) >= 0;
+  const strokeColor = isPositive ? "#22c55e" : "#ef4444";
+  const fillId = isPositive ? "pnlGreenGradient" : "pnlRedGradient";
+
+  return (
+    <Card className="border-border bg-card overflow-hidden">
+      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <LineChart className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold uppercase tracking-wider">Évolution du Portefeuille</h2>
+        </div>
+        {data && (
+          <div className="flex items-center gap-4 text-xs">
+            <span className="text-muted-foreground">
+              Réalisé :{" "}
+              <span className={data.realizedPnl >= 0 ? "text-green-400" : "text-red-400"}>
+                {data.realizedPnl >= 0 ? "+" : ""}${fmt(data.realizedPnl)}
+              </span>
+            </span>
+            <span className="text-muted-foreground">
+              Non réalisé :{" "}
+              <span className={data.unrealizedPnl >= 0 ? "text-green-400" : "text-red-400"}>
+                {data.unrealizedPnl >= 0 ? "+" : ""}${fmt(data.unrealizedPnl)}
+              </span>
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="p-4">
+        {isLoading && (
+          <div className="h-48 flex items-center justify-center text-muted-foreground text-sm animate-pulse">
+            Chargement…
+          </div>
+        )}
+
+        {!isLoading && !hasData && (
+          <div className="h-48 flex flex-col items-center justify-center text-muted-foreground text-sm gap-2">
+            <BarChart2 className="h-8 w-8 opacity-30" />
+            <p>Effectuez votre premier trade pour voir l'évolution du P&L</p>
+          </div>
+        )}
+
+        {!isLoading && hasData && (
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={points} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="pnlGreenGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="pnlRedGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <XAxis
+                dataKey="date"
+                tickFormatter={fmtDate}
+                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                axisLine={false}
+                tickLine={false}
+                width={48}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Area
+                type="monotone"
+                dataKey="portfolioValue"
+                stroke={strokeColor}
+                strokeWidth={2}
+                fill={`url(#${fillId})`}
+                dot={points.length <= 10 ? { r: 3, fill: strokeColor, strokeWidth: 0 } : false}
+                activeDot={{ r: 5, fill: strokeColor, strokeWidth: 0 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      {data && hasData && (
+        <div className="px-4 pb-3 flex gap-6 text-xs text-muted-foreground border-t border-border pt-3">
+          <span>
+            Balance actuelle :{" "}
+            <span className="font-mono text-foreground">${fmt(data.currentBalance)}</span>
+          </span>
+          <span>
+            P&L total :{" "}
+            <span className={`font-mono font-semibold ${isPositive ? "text-green-400" : "text-red-400"}`}>
+              {isPositive ? "+" : ""}${fmt(data.totalPnl)} ({isPositive ? "+" : ""}{data.totalPnlPercent.toFixed(2)}%)
+            </span>
+          </span>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 export default function PortfolioPage() {
   const { data: me } = useGetMe();
   const mode = (me?.tradingMode ?? "demo") as "real" | "demo";
@@ -87,6 +246,7 @@ export default function PortfolioPage() {
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: [`/api/portfolio/${mode}`] });
     queryClient.invalidateQueries({ queryKey: [`/api/portfolio/${mode}/summary`] });
+    queryClient.invalidateQueries({ queryKey: [`/api/portfolio/${mode}/pnl-history`] });
     queryClient.invalidateQueries({ queryKey: [`/api/trades/${mode}/open`] });
     queryClient.invalidateQueries({ queryKey: ["/api/wallet/balance"] });
   };
@@ -166,6 +326,8 @@ export default function PortfolioPage() {
             />
           </div>
         )}
+
+        <PnlChart mode={mode} />
 
         {summary && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
