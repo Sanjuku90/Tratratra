@@ -6,7 +6,7 @@ services:
     plan: free
     buildCommand: |
       npm install -g pnpm@10 &&
-      pnpm install --frozen-lockfile &&
+      NODE_ENV=development pnpm install --frozen-lockfile &&
       PORT=3000 BASE_PATH=/ pnpm --filter @workspace/trading-platform run build &&
       pnpm --filter @workspace/api-server run build
     startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
