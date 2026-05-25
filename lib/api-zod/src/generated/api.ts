@@ -25,6 +25,7 @@ export const GetMeResponse = zod.object({
   "email": zod.string(),
   "displayName": zod.string().nullish(),
   "tradingMode": zod.enum(['real', 'demo']),
+  "isAdmin": zod.boolean(),
   "createdAt": zod.string()
 })
 
@@ -43,6 +44,7 @@ export const UpdateMeResponse = zod.object({
   "email": zod.string(),
   "displayName": zod.string().nullish(),
   "tradingMode": zod.enum(['real', 'demo']),
+  "isAdmin": zod.boolean(),
   "createdAt": zod.string()
 })
 
@@ -317,6 +319,108 @@ export const GetWatchlistResponse = zod.array(GetWatchlistResponseItem)
  */
 export const AddToWatchlistBody = zod.object({
   "symbol": zod.string()
+})
+
+
+/**
+ * @summary Get all pending deposit/withdrawal transactions with user info
+ */
+export const AdminGetTransactionsResponseItem = zod.object({
+  "id": zod.number(),
+  "type": zod.enum(['deposit', 'withdrawal']),
+  "amount": zod.number(),
+  "currency": zod.string(),
+  "status": zod.enum(['pending', 'completed', 'failed']),
+  "description": zod.string().nullish(),
+  "adminNote": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "userId": zod.number(),
+  "userEmail": zod.string(),
+  "userDisplayName": zod.string().nullish()
+})
+export const AdminGetTransactionsResponse = zod.array(AdminGetTransactionsResponseItem)
+
+
+/**
+ * @summary Approve a pending transaction
+ */
+export const AdminApproveTransactionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminApproveTransactionResponse = zod.object({
+  "id": zod.number(),
+  "type": zod.enum(['deposit', 'withdrawal']),
+  "amount": zod.number(),
+  "currency": zod.string(),
+  "status": zod.enum(['pending', 'completed', 'failed']),
+  "description": zod.string().nullish(),
+  "adminNote": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "userId": zod.number(),
+  "userEmail": zod.string(),
+  "userDisplayName": zod.string().nullish()
+})
+
+
+/**
+ * @summary Reject a pending transaction
+ */
+export const AdminRejectTransactionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminRejectTransactionBody = zod.object({
+  "note": zod.string().optional()
+})
+
+export const AdminRejectTransactionResponse = zod.object({
+  "id": zod.number(),
+  "type": zod.enum(['deposit', 'withdrawal']),
+  "amount": zod.number(),
+  "currency": zod.string(),
+  "status": zod.enum(['pending', 'completed', 'failed']),
+  "description": zod.string().nullish(),
+  "adminNote": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "userId": zod.number(),
+  "userEmail": zod.string(),
+  "userDisplayName": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get all users
+ */
+export const AdminGetUsersResponseItem = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "displayName": zod.string().nullish(),
+  "tradingMode": zod.enum(['real', 'demo']),
+  "realBalance": zod.number(),
+  "demoBalance": zod.number(),
+  "isAdmin": zod.boolean(),
+  "createdAt": zod.string()
+})
+export const AdminGetUsersResponse = zod.array(AdminGetUsersResponseItem)
+
+
+/**
+ * @summary Toggle admin status for a user
+ */
+export const AdminToggleAdminParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminToggleAdminResponse = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "displayName": zod.string().nullish(),
+  "tradingMode": zod.enum(['real', 'demo']),
+  "realBalance": zod.number(),
+  "demoBalance": zod.number(),
+  "isAdmin": zod.boolean(),
+  "createdAt": zod.string()
 })
 
 

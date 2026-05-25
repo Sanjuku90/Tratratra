@@ -11,6 +11,7 @@ export const transactionsTable = sqliteTable("transactions", {
   currency: text("currency").notNull().default("USD"),
   status: text("status", { enum: ["pending", "completed", "failed"] }).notNull().default("completed"),
   description: text("description"),
+  adminNote: text("admin_note"),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
 });
 

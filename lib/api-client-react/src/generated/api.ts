@@ -20,6 +20,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminRejectInput,
+  AdminTransaction,
+  AdminUser,
   Asset,
   AssetPrice,
   Candle,
@@ -1398,6 +1401,372 @@ export const useAddToWatchlist = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getAddToWatchlistMutationOptions(options));
+    }
+
+export const getAdminGetTransactionsUrl = () => {
+
+
+
+
+  return `/api/admin/transactions`
+}
+
+/**
+ * @summary Get all pending deposit/withdrawal transactions with user info
+ */
+export const adminGetTransactions = async ( options?: RequestInit): Promise<AdminTransaction[]> => {
+
+  return customFetch<AdminTransaction[]>(getAdminGetTransactionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetTransactionsQueryKey = () => {
+    return [
+    `/api/admin/transactions`
+    ] as const;
+    }
+
+
+export const getAdminGetTransactionsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetTransactions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetTransactions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetTransactionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetTransactions>>> = ({ signal }) => adminGetTransactions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetTransactions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminGetTransactionsQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetTransactions>>>
+export type AdminGetTransactionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get all pending deposit/withdrawal transactions with user info
+ */
+
+export function useAdminGetTransactions<TData = Awaited<ReturnType<typeof adminGetTransactions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetTransactions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminGetTransactionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAdminApproveTransactionUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/transactions/${id}/approve`
+}
+
+/**
+ * @summary Approve a pending transaction
+ */
+export const adminApproveTransaction = async (id: number, options?: RequestInit): Promise<AdminTransaction> => {
+
+  return customFetch<AdminTransaction>(getAdminApproveTransactionUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getAdminApproveTransactionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveTransaction>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminApproveTransaction>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['adminApproveTransaction'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminApproveTransaction>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  adminApproveTransaction(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminApproveTransactionMutationResult = NonNullable<Awaited<ReturnType<typeof adminApproveTransaction>>>
+
+    export type AdminApproveTransactionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Approve a pending transaction
+ */
+export const useAdminApproveTransaction = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveTransaction>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminApproveTransaction>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getAdminApproveTransactionMutationOptions(options));
+    }
+
+export const getAdminRejectTransactionUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/transactions/${id}/reject`
+}
+
+/**
+ * @summary Reject a pending transaction
+ */
+export const adminRejectTransaction = async (id: number,
+    adminRejectInput?: AdminRejectInput, options?: RequestInit): Promise<AdminTransaction> => {
+
+  return customFetch<AdminTransaction>(getAdminRejectTransactionUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      adminRejectInput,)
+  }
+);}
+
+
+
+
+export const getAdminRejectTransactionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRejectTransaction>>, TError,{id: number;data?: BodyType<AdminRejectInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminRejectTransaction>>, TError,{id: number;data?: BodyType<AdminRejectInput>}, TContext> => {
+
+const mutationKey = ['adminRejectTransaction'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRejectTransaction>>, {id: number;data?: BodyType<AdminRejectInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  adminRejectTransaction(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminRejectTransactionMutationResult = NonNullable<Awaited<ReturnType<typeof adminRejectTransaction>>>
+    export type AdminRejectTransactionMutationBody = BodyType<AdminRejectInput> | undefined
+    export type AdminRejectTransactionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Reject a pending transaction
+ */
+export const useAdminRejectTransaction = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRejectTransaction>>, TError,{id: number;data?: BodyType<AdminRejectInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminRejectTransaction>>,
+        TError,
+        {id: number;data?: BodyType<AdminRejectInput>},
+        TContext
+      > => {
+      return useMutation(getAdminRejectTransactionMutationOptions(options));
+    }
+
+export const getAdminGetUsersUrl = () => {
+
+
+
+
+  return `/api/admin/users`
+}
+
+/**
+ * @summary Get all users
+ */
+export const adminGetUsers = async ( options?: RequestInit): Promise<AdminUser[]> => {
+
+  return customFetch<AdminUser[]>(getAdminGetUsersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetUsersQueryKey = () => {
+    return [
+    `/api/admin/users`
+    ] as const;
+    }
+
+
+export const getAdminGetUsersQueryOptions = <TData = Awaited<ReturnType<typeof adminGetUsers>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetUsersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetUsers>>> = ({ signal }) => adminGetUsers({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetUsers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminGetUsersQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetUsers>>>
+export type AdminGetUsersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get all users
+ */
+
+export function useAdminGetUsers<TData = Awaited<ReturnType<typeof adminGetUsers>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminGetUsersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAdminToggleAdminUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/users/${id}/toggle-admin`
+}
+
+/**
+ * @summary Toggle admin status for a user
+ */
+export const adminToggleAdmin = async (id: number, options?: RequestInit): Promise<AdminUser> => {
+
+  return customFetch<AdminUser>(getAdminToggleAdminUrl(id),
+  {
+    ...options,
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
+export const getAdminToggleAdminMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminToggleAdmin>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminToggleAdmin>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['adminToggleAdmin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminToggleAdmin>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  adminToggleAdmin(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminToggleAdminMutationResult = NonNullable<Awaited<ReturnType<typeof adminToggleAdmin>>>
+
+    export type AdminToggleAdminMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Toggle admin status for a user
+ */
+export const useAdminToggleAdmin = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminToggleAdmin>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminToggleAdmin>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getAdminToggleAdminMutationOptions(options));
     }
 
 export const getRemoveFromWatchlistUrl = (symbol: string,) => {

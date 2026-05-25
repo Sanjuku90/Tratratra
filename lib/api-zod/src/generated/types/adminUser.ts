@@ -5,15 +5,16 @@
  * Trading platform API
  * OpenAPI spec version: 0.1.0
  */
-import type { UserProfileTradingMode } from './userProfileTradingMode';
+import type { AdminUserTradingMode } from './adminUserTradingMode';
 
-export interface UserProfile {
+export interface AdminUser {
   id: number;
-  clerkId: string;
   email: string;
   /** @nullable */
   displayName?: string | null;
-  tradingMode: UserProfileTradingMode;
+  tradingMode: AdminUserTradingMode;
+  realBalance: number;
+  demoBalance: number;
   isAdmin: boolean;
   createdAt: string;
 }

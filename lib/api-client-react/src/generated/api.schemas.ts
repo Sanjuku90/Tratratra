@@ -24,6 +24,7 @@ export interface UserProfile {
   /** @nullable */
   displayName?: string | null;
   tradingMode: UserProfileTradingMode;
+  isAdmin: boolean;
   createdAt: string;
 }
 
@@ -323,6 +324,64 @@ export interface WatchlistItem {
   currentPrice: number;
   change24h: number;
   change24hPercent: number;
+}
+
+export type AdminTransactionType = typeof AdminTransactionType[keyof typeof AdminTransactionType];
+
+
+export const AdminTransactionType = {
+  deposit: 'deposit',
+  withdrawal: 'withdrawal',
+} as const;
+
+export type AdminTransactionStatus = typeof AdminTransactionStatus[keyof typeof AdminTransactionStatus];
+
+
+export const AdminTransactionStatus = {
+  pending: 'pending',
+  completed: 'completed',
+  failed: 'failed',
+} as const;
+
+export interface AdminTransaction {
+  id: number;
+  type: AdminTransactionType;
+  amount: number;
+  currency: string;
+  status: AdminTransactionStatus;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  adminNote?: string | null;
+  createdAt: string;
+  userId: number;
+  userEmail: string;
+  /** @nullable */
+  userDisplayName?: string | null;
+}
+
+export interface AdminRejectInput {
+  note?: string;
+}
+
+export type AdminUserTradingMode = typeof AdminUserTradingMode[keyof typeof AdminUserTradingMode];
+
+
+export const AdminUserTradingMode = {
+  real: 'real',
+  demo: 'demo',
+} as const;
+
+export interface AdminUser {
+  id: number;
+  email: string;
+  /** @nullable */
+  displayName?: string | null;
+  tradingMode: AdminUserTradingMode;
+  realBalance: number;
+  demoBalance: number;
+  isAdmin: boolean;
+  createdAt: string;
 }
 
 export interface WatchlistInput {

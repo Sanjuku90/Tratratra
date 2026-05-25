@@ -9,7 +9,8 @@ import {
   Wallet,
   Settings,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -132,6 +133,14 @@ export function Layout({ children }: LayoutProps) {
                   <span>Paramètres</span>
                 </DropdownMenuItem>
               </Link>
+              {userProfile?.isAdmin && (
+                <Link href="/admin">
+                  <DropdownMenuItem className="cursor-pointer focus:bg-secondary text-primary">
+                    <Shield className="mr-2 h-4 w-4" />
+                    <span>Espace Admin</span>
+                  </DropdownMenuItem>
+                </Link>
+              )}
               <DropdownMenuItem onClick={() => signOut({ redirectUrl: import.meta.env.BASE_URL || "/" })} className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Déconnexion</span>

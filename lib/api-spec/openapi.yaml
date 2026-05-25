@@ -19,6 +19,8 @@ tags:
     description: Market data
   - name: wallet
     description: Wallet and deposits
+  - name: admin
+    description: Admin operations
 
 paths:
   /healthz:
@@ -339,6 +341,99 @@ paths:
               schema:
                 $ref: "#/components/schemas/WatchlistItem"
 
+  /admin/transactions:
+    get:
+      operationId: adminGetTransactions
+      tags: [admin]
+      summary: Get all pending deposit/withdrawal transactions with user info
+      responses:
+        "200":
+          description: Pending transactions list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminTransaction"
+
+  /admin/transactions/{id}/approve:
+    post:
+      operationId: adminApproveTransaction
+      tags: [admin]
+      summary: Approve a pending transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transaction approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminTransaction"
+
+  /admin/transactions/{id}/reject:
+    post:
+      operationId: adminRejectTransaction
+      tags: [admin]
+      summary: Reject a pending transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminRejectInput"
+      responses:
+        "200":
+          description: Transaction rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminTransaction"
+
+  /admin/users:
+    get:
+      operationId: adminGetUsers
+      tags: [admin]
+      summary: Get all users
+      responses:
+        "200":
+          description: All users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminUser"
+
+  /admin/users/{id}/toggle-admin:
+    patch:
+      operationId: adminToggleAdmin
+      tags: [admin]
+      summary: Toggle admin status for a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+
   /market/watchlist/{symbol}:
     delete:
       operationId: removeFromWatchlist
@@ -377,9 +472,11 @@ components:
         tradingMode:
           type: string
           enum: [real, demo]
+        isAdmin:
+          type: boolean
         createdAt:
           type: string
-      required: [id, clerkId, email, tradingMode, createdAt]
+      required: [id, clerkId, email, tradingMode, isAdmin, createdAt]
 
     UserProfileUpdate:
       type: object
@@ -660,6 +757,63 @@ components:
         change24hPercent:
           type: number
       required: [symbol, name, category, currentPrice, change24h, change24hPercent]
+
+    AdminTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [deposit, withdrawal]
+        amount:
+          type: number
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [pending, completed, failed]
+        description:
+          type: ["string", "null"]
+        adminNote:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        userId:
+          type: integer
+        userEmail:
+          type: string
+        userDisplayName:
+          type: ["string", "null"]
+      required: [id, type, amount, currency, status, createdAt, userId, userEmail]
+
+    AdminRejectInput:
+      type: object
+      properties:
+        note:
+          type: string
+
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        displayName:
+          type: ["string", "null"]
+        tradingMode:
+          type: string
+          enum: [real, demo]
+        realBalance:
+          type: number
+        demoBalance:
+          type: number
+        isAdmin:
+          type: boolean
+        createdAt:
+          type: string
+      required: [id, email, tradingMode, realBalance, demoBalance, isAdmin, createdAt]
 
     WatchlistInput:
       type: object

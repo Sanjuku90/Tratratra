@@ -17,7 +17,7 @@ import {
   useDeposit,
   useWithdraw,
 } from "@workspace/api-client-react";
-import { Wallet, ArrowDownCircle, ArrowUpCircle, Clock, CreditCard, Building2, Bitcoin } from "lucide-react";
+import { Wallet, ArrowDownCircle, ArrowUpCircle, Clock, Building2, Bitcoin, Copy, CheckCircle, AlertCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 function fmt(n: number) {
@@ -249,44 +249,62 @@ export default function WalletPage() {
             <DialogTitle>Déposer des fonds</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            <div>
-              <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2 block">Méthode</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {(["card", "bank_transfer", "crypto"] as DepositMethod[]).map((m) => {
-                  const icons = { card: CreditCard, bank_transfer: Building2, crypto: Bitcoin };
-                  const labels = { card: "Carte", bank_transfer: "Virement", crypto: "Crypto" };
-                  const Icon = icons[m];
-                  return (
-                    <button
-                      key={m}
-                      onClick={() => setDepositMethod(m)}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border text-xs font-medium transition-colors ${
-                        depositMethod === m
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border bg-secondary/30 text-muted-foreground hover:bg-secondary"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {labels[m]}
-                    </button>
-                  );
-                })}
+            {/* Deposit address */}
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wider">
+                <Bitcoin className="h-3.5 w-3.5 text-primary" />
+                Adresse de dépôt crypto
+              </div>
+              <div className="flex items-center gap-2">
+                <p className="font-mono text-xs font-bold text-primary break-all flex-1">
+                  TAB1oeEKDS5NATwFAaUrTioDU9djX7anyS
+                </p>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText("TAB1oeEKDS5NATwFAaUrTioDU9djX7anyS");
+                  }}
+                  className="shrink-0 p-1.5 rounded-md hover:bg-primary/20 text-muted-foreground hover:text-primary transition-colors"
+                  title="Copier l'adresse"
+                >
+                  <Copy className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="flex gap-4 text-xs">
+                <div>
+                  <span className="text-muted-foreground">Minimum : </span>
+                  <span className="font-bold text-foreground">$10</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Frais : </span>
+                  <span className="font-bold text-foreground">$1</span>
+                </div>
               </div>
             </div>
+
+            {/* Validation info */}
+            <div className="flex gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-3 text-xs text-yellow-400">
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>
+                Envoyez le montant exact à l'adresse ci-dessus, puis confirmez ci-dessous.
+                Votre dépôt sera crédité après validation par notre équipe (sous 24h).
+              </span>
+            </div>
+
             <div>
               <Label htmlFor="deposit-amount" className="text-xs text-muted-foreground uppercase tracking-wider mb-2 block">
-                Montant (USD)
+                Montant envoyé (USD)
               </Label>
               <Input
                 id="deposit-amount"
                 type="number"
-                placeholder="0.00"
+                placeholder="Minimum $10"
+                min="10"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="bg-card border-border font-mono"
               />
               <div className="flex gap-2 mt-2">
-                {[100, 500, 1000, 5000].map((v) => (
+                {[50, 100, 500, 1000].map((v) => (
                   <button
                     key={v}
                     onClick={() => setAmount(String(v))}
@@ -296,13 +314,24 @@ export default function WalletPage() {
                   </button>
                 ))}
               </div>
+              {amount && parseFloat(amount) >= 10 && (
+                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3 text-green-400" />
+                  Vous recevrez{" "}
+                  <span className="text-green-400 font-bold">
+                    ${(parseFloat(amount) - 1).toFixed(2)}
+                  </span>{" "}
+                  après déduction des frais ($1)
+                </p>
+              )}
             </div>
+
             <Button
               className="w-full"
               onClick={handleDeposit}
-              disabled={depositMutation.isPending || !amount}
+              disabled={depositMutation.isPending || !amount || parseFloat(amount) < 10}
             >
-              {depositMutation.isPending ? "Traitement..." : `Déposer $${amount || "0"}`}
+              {depositMutation.isPending ? "Envoi en cours..." : "Confirmer le dépôt"}
             </Button>
           </div>
         </DialogContent>

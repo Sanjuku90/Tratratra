@@ -19,32 +19,32 @@ router.get("/wallet/balance", requireAuth, async (req: any, res) => {
   }
 });
 
-// POST /api/wallet/deposit
+// POST /api/wallet/deposit — creates a PENDING transaction (admin must approve)
 router.post("/wallet/deposit", requireAuth, async (req: any, res) => {
   try {
     const { amount, method } = req.body;
-    if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
+    const numAmount = parseFloat(amount);
+    if (!numAmount || numAmount <= 0) {
+      return res.status(400).json({ error: "Montant invalide" });
+    }
+    if (numAmount < 10) {
+      return res.status(400).json({ error: "Le dépôt minimum est de $10" });
+    }
 
     const user = await getOrCreateUser(req.clerkId);
-    const newBalance = parseFloat(user.realBalance) + parseFloat(amount);
-
-    const [updated] = await db.update(usersTable)
-      .set({ realBalance: newBalance.toString(), updatedAt: new Date() })
-      .where(eq(usersTable.id, user.id))
-      .returning();
 
     await db.insert(transactionsTable).values({
       userId: user.id,
       type: "deposit",
-      amount: amount.toString(),
+      amount: numAmount.toString(),
       currency: "USD",
-      status: "completed",
-      description: `Deposit via ${method ?? "card"}`,
+      status: "pending",
+      description: `Dépôt via ${method ?? "crypto"} — en attente de validation`,
     });
 
     res.json({
-      realBalance: parseFloat(updated.realBalance),
-      demoBalance: parseFloat(updated.demoBalance),
+      realBalance: parseFloat(user.realBalance),
+      demoBalance: parseFloat(user.demoBalance),
       currency: "USD",
     });
   } catch {
@@ -52,18 +52,21 @@ router.post("/wallet/deposit", requireAuth, async (req: any, res) => {
   }
 });
 
-// POST /api/wallet/withdraw
+// POST /api/wallet/withdraw — deducts balance immediately, creates PENDING transaction
 router.post("/wallet/withdraw", requireAuth, async (req: any, res) => {
   try {
     const { amount, method } = req.body;
-    if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
-
-    const user = await getOrCreateUser(req.clerkId);
-    if (parseFloat(user.realBalance) < parseFloat(amount)) {
-      return res.status(400).json({ error: "Insufficient balance" });
+    const numAmount = parseFloat(amount);
+    if (!numAmount || numAmount <= 0) {
+      return res.status(400).json({ error: "Montant invalide" });
     }
 
-    const newBalance = parseFloat(user.realBalance) - parseFloat(amount);
+    const user = await getOrCreateUser(req.clerkId);
+    if (parseFloat(user.realBalance) < numAmount) {
+      return res.status(400).json({ error: "Solde insuffisant" });
+    }
+
+    const newBalance = parseFloat(user.realBalance) - numAmount;
     const [updated] = await db.update(usersTable)
       .set({ realBalance: newBalance.toString(), updatedAt: new Date() })
       .where(eq(usersTable.id, user.id))
@@ -72,10 +75,10 @@ router.post("/wallet/withdraw", requireAuth, async (req: any, res) => {
     await db.insert(transactionsTable).values({
       userId: user.id,
       type: "withdrawal",
-      amount: amount.toString(),
+      amount: numAmount.toString(),
       currency: "USD",
-      status: "completed",
-      description: `Withdrawal via ${method ?? "bank_transfer"}`,
+      status: "pending",
+      description: `Retrait via ${method ?? "crypto"} — en attente de validation`,
     });
 
     res.json({

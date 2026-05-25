@@ -15,6 +15,9 @@ router.get("/account/me", requireAuth, async (req: any, res) => {
     const email = (auth?.sessionClaims?.email as string) ?? undefined;
     const user = await getOrCreateUser(clerkId, email);
 
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const isAdmin = user.isAdmin || (!!adminEmail && user.email === adminEmail);
+
     res.json({
       id: user.id,
       clerkId: user.clerkId,
@@ -23,6 +26,7 @@ router.get("/account/me", requireAuth, async (req: any, res) => {
       tradingMode: user.tradingMode,
       realBalance: parseFloat(user.realBalance),
       demoBalance: parseFloat(user.demoBalance),
+      isAdmin: isAdmin,
       createdAt: user.createdAt.toISOString(),
     });
   } catch (err) {

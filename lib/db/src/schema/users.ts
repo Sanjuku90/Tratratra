@@ -10,6 +10,7 @@ export const usersTable = sqliteTable("users", {
   tradingMode: text("trading_mode", { enum: ["real", "demo"] }).notNull().default("demo"),
   realBalance: text("real_balance").notNull().default("0"),
   demoBalance: text("demo_balance").notNull().default("100000"),
+  isAdmin: integer("is_admin", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
 });
