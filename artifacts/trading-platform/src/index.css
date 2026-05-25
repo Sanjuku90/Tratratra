@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
 @layer theme, base, clerk, components, utilities;
 
 @import "tailwindcss";
@@ -63,7 +65,6 @@
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 
   --font-sans: var(--app-font-sans);
-  --font-serif: var(--app-font-serif);
   --font-mono: var(--app-font-mono);
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -73,72 +74,61 @@
 }
 
 :root {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
+  --background: 240 10% 4%;
+  --foreground: 0 0% 100%;
 
-  --opaque-button-border-intensity: 9;  /* In terms of percentages */
+  --border: 240 10% 15%;
+  --card: 240 10% 6%;
+  --card-foreground: 0 0% 100%;
+  --card-border: 240 10% 15%;
 
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+  --sidebar: 240 10% 6%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-border: 240 10% 15%;
+  --sidebar-primary: 250 100% 65%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 10% 12%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 240 10% 15%;
 
-  /* Force dark mode colors always as it's a precision trading app */
-  --background: 222 47% 4%;
-  --foreground: 210 40% 98%;
+  --popover: 240 10% 6%;
+  --popover-foreground: 0 0% 100%;
+  --popover-border: 240 10% 15%;
 
-  --border: 217 32% 17%;
-  --card: 222 47% 6%;
-  --card-foreground: 210 40% 98%;
-  --card-border: 217 32% 17%;
-
-  --sidebar: 222 47% 6%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-border: 217 32% 17%;
-  --sidebar-primary: 210 100% 50%;
-  --sidebar-primary-foreground: 210 40% 98%;
-  --sidebar-accent: 217 32% 17%;
-  --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-ring: 217 32% 17%;
-
-  --popover: 222 47% 6%;
-  --popover-foreground: 210 40% 98%;
-  --popover-border: 217 32% 17%;
-
-  --primary: 210 100% 50%;
+  --primary: 250 100% 65%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 217 32% 17%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 240 10% 12%;
+  --secondary-foreground: 0 0% 100%;
 
-  --muted: 217 32% 17%;
-  --muted-foreground: 215 20.2% 65.1%;
+  --muted: 240 10% 15%;
+  --muted-foreground: 240 5% 60%;
 
-  --accent: 217 32% 17%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 240 10% 15%;
+  --accent-foreground: 0 0% 100%;
 
-  --destructive: 348 83% 47%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
 
   --success: 142 71% 45%;
-  --success-foreground: 210 40% 98%;
+  --success-foreground: 0 0% 100%;
 
-  --input: 217 32% 17%;
-  --ring: 210 100% 50%;
+  --input: 240 10% 15%;
+  --ring: 250 100% 65%;
   
-  --chart-1: 210 100% 50%;
+  --chart-1: 250 100% 65%;
   --chart-2: 142 71% 45%;
-  --chart-3: 348 83% 47%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
+  --chart-3: 0 84% 60%;
+  --chart-4: 43 100% 50%;
+  --chart-5: 27 100% 50%;
 
-  --app-font-sans: 'Inter', sans-serif;
-  --app-font-serif: Georgia, serif;
-  --app-font-mono: 'JetBrains Mono', 'Menlo', monospace;
+  --app-font-sans: 'Space Grotesk', sans-serif;
+  --app-font-mono: 'JetBrains Mono', monospace;
   
-  --radius: 0.25rem; 
+  --radius: 0.5rem; 
 }
 
 .dark {
-  /* Inherit root variables as root is already dark */
 }
 
 @layer base {
@@ -147,7 +137,7 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-background text-foreground selection:bg-primary/30 selection:text-primary-foreground;
   }
 }
 
