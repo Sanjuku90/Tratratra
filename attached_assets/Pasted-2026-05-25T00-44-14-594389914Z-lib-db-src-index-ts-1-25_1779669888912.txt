@@ -1,0 +1,50 @@
+2026-05-25T00:44:14.594389914Z lib/db/src/index.ts(1,25): error TS2307: Cannot find module 'drizzle-orm/libsql' or its corresponding type declarations.
+2026-05-25T00:44:14.594394084Z lib/db/src/index.ts(2,30): error TS2307: Cannot find module '@libsql/client' or its corresponding type declarations.
+2026-05-25T00:44:14.594454528Z lib/db/src/index.ts(5,13): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+2026-05-25T00:44:14.594465948Z lib/db/src/index.ts(6,19): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+2026-05-25T00:44:14.594539432Z lib/db/src/schema/assets.ts(1,44): error TS2307: Cannot find module 'drizzle-orm/sqlite-core' or its corresponding type declarations.
+2026-05-25T00:44:14.594544532Z lib/db/src/schema/assets.ts(2,36): error TS2307: Cannot find module 'drizzle-zod' or its corresponding type declarations.
+2026-05-25T00:44:14.594547162Z lib/db/src/schema/assets.ts(3,19): error TS2307: Cannot find module 'zod/v4' or its corresponding type declarations.
+2026-05-25T00:44:14.594549612Z lib/db/src/schema/trades.ts(1,44): error TS2307: Cannot find module 'drizzle-orm/sqlite-core' or its corresponding type declarations.
+2026-05-25T00:44:14.594619196Z lib/db/src/schema/trades.ts(2,36): error TS2307: Cannot find module 'drizzle-zod' or its corresponding type declarations.
+2026-05-25T00:44:14.594643197Z lib/db/src/schema/trades.ts(3,19): error TS2307: Cannot find module 'zod/v4' or its corresponding type declarations.
+2026-05-25T00:44:14.594646687Z lib/db/src/schema/transactions.ts(1,44): error TS2307: Cannot find module 'drizzle-orm/sqlite-core' or its corresponding type declarations.
+2026-05-25T00:44:14.59470636Z lib/db/src/schema/transactions.ts(2,36): error TS2307: Cannot find module 'drizzle-zod' or its corresponding type declarations.
+2026-05-25T00:44:14.594715241Z lib/db/src/schema/transactions.ts(3,19): error TS2307: Cannot find module 'zod/v4' or its corresponding type declarations.
+2026-05-25T00:44:14.594733601Z lib/db/src/schema/users.ts(1,44): error TS2307: Cannot find module 'drizzle-orm/sqlite-core' or its corresponding type declarations.
+2026-05-25T00:44:14.594740542Z lib/db/src/schema/users.ts(2,36): error TS2307: Cannot find module 'drizzle-zod' or its corresponding type declarations.
+2026-05-25T00:44:14.594752982Z lib/db/src/schema/users.ts(3,19): error TS2307: Cannot find module 'zod/v4' or its corresponding type declarations.
+2026-05-25T00:44:14.594812265Z lib/db/src/schema/watchlist.ts(1,52): error TS2307: Cannot find module 'drizzle-orm/sqlite-core' or its corresponding type declarations.
+2026-05-25T00:44:14.594818526Z lib/db/src/schema/watchlist.ts(2,36): error TS2307: Cannot find module 'drizzle-zod' or its corresponding type declarations.
+2026-05-25T00:44:14.594822666Z lib/db/src/schema/watchlist.ts(3,19): error TS2307: Cannot find module 'zod/v4' or its corresponding type declarations.
+2026-05-25T00:44:14.594835296Z lib/db/src/schema/watchlist.ts(11,5): error TS7006: Parameter 't' implicitly has an 'any' type.
+2026-05-25T00:44:15.030917543Z lib/api-client-react/src/custom-hooks.ts(1,29): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+2026-05-25T00:44:15.030939184Z lib/api-client-react/src/generated/api.ts(11,8): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+2026-05-25T00:44:15.030942494Z lib/api-client-react/src/generated/api.ts(20,8): error TS2307: Cannot find module '@tanstack/react-query' or its corresponding type declarations.
+2026-05-25T00:44:15.030952625Z lib/api-client-react/src/generated/api.ts(96,80): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.030955355Z lib/api-client-react/src/generated/api.ts(173,74): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.030958015Z lib/api-client-react/src/generated/api.ts(248,120): error TS7006: Parameter 'props' implicitly has an 'any' type.
+2026-05-25T00:44:15.031006817Z lib/api-client-react/src/generated/api.ts(321,85): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.031012058Z lib/api-client-react/src/generated/api.ts(396,114): error TS7006: Parameter 'props' implicitly has an 'any' type.
+2026-05-25T00:44:15.031014648Z lib/api-client-react/src/generated/api.ts(467,116): error TS7006: Parameter 'props' implicitly has an 'any' type.
+2026-05-25T00:44:15.031040649Z lib/api-client-react/src/generated/api.ts(540,84): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.031072081Z lib/api-client-react/src/generated/api.ts(617,81): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.031083181Z lib/api-client-react/src/generated/api.ts(694,88): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.031088802Z lib/api-client-react/src/generated/api.ts(771,78): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.031129333Z lib/api-client-react/src/generated/api.ts(846,116): error TS7006: Parameter 'props' implicitly has an 'any' type.
+2026-05-25T00:44:15.031148185Z lib/api-client-react/src/generated/api.ts(919,85): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.031156005Z lib/api-client-react/src/generated/api.ts(993,100): error TS7006: Parameter 'props' implicitly has an 'any' type.
+2026-05-25T00:44:15.031159125Z lib/api-client-react/src/generated/api.ts(1066,84): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.031182686Z lib/api-client-react/src/generated/api.ts(1143,82): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.031186836Z lib/api-client-react/src/generated/api.ts(1220,79): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.031228518Z lib/api-client-react/src/generated/api.ts(1297,81): error TS7031: Binding element 'signal' implicitly has an 'any' type.
+2026-05-25T00:44:15.031231919Z lib/api-client-react/src/generated/api.ts(1372,123): error TS7006: Parameter 'props' implicitly has an 'any' type.
+2026-05-25T00:44:15.03126623Z lib/api-client-react/src/generated/api.ts(1442,112): error TS7006: Parameter 'props' implicitly has an 'any' type.
+2026-05-25T00:44:15.079737394Z lib/api-zod/src/generated/api.ts(8,22): error TS2307: Cannot find module 'zod' or its corresponding type declarations.
+2026-05-25T00:44:15.113272661Z  ELIFECYCLE  Command failed with exit code 1.
+2026-05-25T00:44:15.46900475Z /opt/render/project/src/artifacts/mockup-sandbox:
+2026-05-25T00:44:15.469056002Z  ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @workspace/mockup-sandbox@2.0.0 build: `vite build`
+2026-05-25T00:44:15.469065873Z spawn ENOENT
+2026-05-25T00:44:15.498517276Z  ELIFECYCLE  Command failed with exit code 1.
+2026-05-25T00:44:15.5520081Z ==> Build failed 😞
+2026-05-25T00:44:15.552051342Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
