@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getAuth } from "@clerk/express";
-import { db, usersTable } from "@workspace/db";
+import { db, usersTable, transactionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { requireAuth, getOrCreateUser } from "../lib/auth";
 
@@ -21,6 +21,8 @@ router.get("/account/me", requireAuth, async (req: any, res) => {
       email: user.email,
       displayName: user.displayName ?? null,
       tradingMode: user.tradingMode,
+      realBalance: parseFloat(user.realBalance),
+      demoBalance: parseFloat(user.demoBalance),
       createdAt: user.createdAt.toISOString(),
     });
   } catch (err) {
@@ -66,9 +68,18 @@ router.post("/account/reset-demo", requireAuth, async (req: any, res) => {
     if (!existing.length) return res.status(404).json({ error: "User not found" });
 
     const [updated] = await db.update(usersTable)
-      .set({ demoBalance: "10000", updatedAt: new Date() })
+      .set({ demoBalance: "100000", updatedAt: new Date() })
       .where(eq(usersTable.clerkId, clerkId))
       .returning();
+
+    await db.insert(transactionsTable).values({
+      userId: updated.id,
+      type: "deposit",
+      amount: "100000",
+      currency: "USD",
+      status: "completed",
+      description: "Demo account reset — balance restored to $100,000",
+    });
 
     res.json({
       id: updated.id,
@@ -76,8 +87,9 @@ router.post("/account/reset-demo", requireAuth, async (req: any, res) => {
       email: updated.email,
       displayName: updated.displayName ?? null,
       tradingMode: updated.tradingMode,
-      createdAt: updated.createdAt.toISOString(),
+      realBalance: parseFloat(updated.realBalance),
       demoBalance: parseFloat(updated.demoBalance),
+      createdAt: updated.createdAt.toISOString(),
     });
   } catch {
     res.status(500).json({ error: "Internal server error" });
