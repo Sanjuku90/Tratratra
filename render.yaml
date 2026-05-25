@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: nexustrade
+    runtime: node
+    region: frankfurt
+    plan: free
+    buildCommand: |
+      npm install -g pnpm@10 &&
+      pnpm install --frozen-lockfile &&
+      PORT=3000 BASE_PATH=/ pnpm --filter @workspace/trading-platform run build &&
+      pnpm --filter @workspace/api-server run build
+    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+    healthCheckPath: /api/healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false

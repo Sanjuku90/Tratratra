@@ -1,19 +1,17 @@
-import { pgTable, text, serial, timestamp, numeric, pgEnum } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const tradingModeEnum = pgEnum("trading_mode", ["real", "demo"]);
-
-export const usersTable = pgTable("users", {
-  id: serial("id").primaryKey(),
+export const usersTable = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   clerkId: text("clerk_id").notNull().unique(),
   email: text("email").notNull(),
   displayName: text("display_name"),
-  tradingMode: tradingModeEnum("trading_mode").notNull().default("demo"),
-  realBalance: numeric("real_balance", { precision: 18, scale: 8 }).notNull().default("0"),
-  demoBalance: numeric("demo_balance", { precision: 18, scale: 8 }).notNull().default("10000"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  tradingMode: text("trading_mode", { enum: ["real", "demo"] }).notNull().default("demo"),
+  realBalance: text("real_balance").notNull().default("0"),
+  demoBalance: text("demo_balance").notNull().default("10000"),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true, createdAt: true, updatedAt: true });

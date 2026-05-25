@@ -1,30 +1,25 @@
-import { pgTable, serial, text, numeric, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
 
-export const tradeSideEnum = pgEnum("trade_side", ["buy", "sell"]);
-export const orderTypeEnum = pgEnum("order_type", ["market", "limit", "stop_loss", "take_profit"]);
-export const tradeStatusEnum = pgEnum("trade_status", ["pending", "open", "closed", "cancelled"]);
-export const tradeModeEnum = pgEnum("trade_mode", ["real", "demo"]);
-
-export const tradesTable = pgTable("trades", {
-  id: serial("id").primaryKey(),
+export const tradesTable = sqliteTable("trades", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull().references(() => usersTable.id),
   symbol: text("symbol").notNull(),
   assetName: text("asset_name").notNull(),
-  side: tradeSideEnum("side").notNull(),
-  orderType: orderTypeEnum("order_type").notNull(),
-  quantity: numeric("quantity", { precision: 18, scale: 8 }).notNull(),
-  price: numeric("price", { precision: 18, scale: 8 }).notNull(),
-  executedPrice: numeric("executed_price", { precision: 18, scale: 8 }),
-  stopLoss: numeric("stop_loss", { precision: 18, scale: 8 }),
-  takeProfit: numeric("take_profit", { precision: 18, scale: 8 }),
-  status: tradeStatusEnum("status").notNull().default("pending"),
-  pnl: numeric("pnl", { precision: 18, scale: 8 }),
-  mode: tradeModeEnum("mode").notNull().default("demo"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  closedAt: timestamp("closed_at"),
+  side: text("side", { enum: ["buy", "sell"] }).notNull(),
+  orderType: text("order_type", { enum: ["market", "limit", "stop_loss", "take_profit"] }).notNull(),
+  quantity: text("quantity").notNull(),
+  price: text("price").notNull(),
+  executedPrice: text("executed_price"),
+  stopLoss: text("stop_loss"),
+  takeProfit: text("take_profit"),
+  status: text("status", { enum: ["pending", "open", "closed", "cancelled"] }).notNull().default("pending"),
+  pnl: text("pnl"),
+  mode: text("mode", { enum: ["real", "demo"] }).notNull().default("demo"),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+  closedAt: integer("closed_at", { mode: "timestamp" }),
 });
 
 export const insertTradeSchema = createInsertSchema(tradesTable).omit({ id: true, createdAt: true });

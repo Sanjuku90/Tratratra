@@ -33,20 +33,18 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "PORT=8080 pnpm --filter @workspace/api-server run dev"
-waitForPort = 8080
+args = "echo 'Replaced by artifact workflow: artifacts/api-server: API Server'"
 
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "PORT=21210 BASE_PATH=/ pnpm --filter @workspace/trading-platform run dev"
-waitForPort = 21210
-
-[workflows.workflow.metadata]
-outputType = "webview"
+args = "echo 'Replaced by artifact workflow: artifacts/trading-platform: web'"
 
 [agent]
 stack = "PNPM_WORKSPACE"
